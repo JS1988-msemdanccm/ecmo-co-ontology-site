@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — V-A Peripheral Femoral</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8F9FA; }
+    .topbar { background: #0D1B2A; color: #E3F2FD; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .topbar a { color: #90CAF9; text-decoration: none; font-size: 0.85rem; }
+    .topbar .title { font-weight: 700; font-size: 0.95rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; }
+    .mode-badge-va { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.75rem; font-weight:700; background:#FBE9E7; color:#BF360C; }
+    pre.rdf { background:#1A1A2E; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #263238; margin:0; }
+    .rdf .prefix { color:#90CAF9; } .rdf .uri { color:#80CBC4; } .rdf .eco { color:#81D4FA; } .rdf .lit { color:#A5D6A7; } .rdf .comment { color:#546E7A; font-style:italic; } .rdf .prop { color:#FFE082; }
+    pre.sparql { background:#0D1B2A; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #1E3A5F; margin:0; }
+    .sparql .kw { color:#CE93D8; font-weight:600; } .sparql .var { color:#80CBC4; } .sparql .uri { color:#81D4FA; } .sparql .cmt { color:#546E7A; font-style:italic; }
+    .query-result { background:#1B5E20; color:#C8E6C9; border-radius:6px; padding:0.6rem 1rem; font-size:0.82rem; font-family:monospace; margin-top:0.5rem; white-space:pre; overflow-x:auto; }
+    .eco-feature { background:#FBE9E7; border-left:4px solid #BF360C; padding:0.5rem 0.75rem; margin-bottom:0.5rem; font-size:0.85rem; border-radius:0 4px 4px 0; }
+    code { background:#F3F4F6; padding:2px 5px; border-radius:3px; font-size:0.85em; color:#1565C0; }
+  </style>
+</head>
+<body>
+<div data-ecmoco-banner class="text-center small py-1" style="background:#FFF3CD; color:#664D03;">Research prototype (pilot) · synthetic example · not clinical guidance</div>
+<div class="topbar">
+  <a href="../index.html">← ECMO-CO Home</a>
+  <span style="color:#37474F">|</span>
+  <a href="index.html">← Examples</a>
+  <span class="title">V-A Peripheral (femoral vein / femoral artery + distal perf)</span>
+  <span class="mode-badge-va">V-A</span>
+</div>
+
+<div class="container my-4">
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="section-label mb-2">Clinical Scenario</div>
+          <h4 class="mb-3">V-A ECMO — Cardiogenic Shock, Peripheral Femoral Cannulation + Distal Limb Perfusion</h4>
+          <p>Adult patient presenting with refractory cardiogenic shock requiring emergent peripheral V-A ECMO. Three-cannula configuration:</p>
+          <ul class="small">
+            <li><strong>Drainage:</strong> right common femoral vein, 25 Fr — deoxygenated venous blood</li>
+            <li><strong>Return:</strong> left common femoral artery, 17 Fr — oxygenated blood returned retrograde</li>
+            <li><strong>Distal perfusion catheter:</strong> 8 Fr anterograde into left superficial femoral artery — prevents ischaemia distal to the arterial cannula; branches off return limb via Y-connector</li>
+          </ul>
+          <p class="small text-muted">Distal limb perfusion is standard of care with femoral arterial cannulation. The scenario includes the catheter as a real component of the configuration even though it is not a drainage/return path of the main circuit.</p>
+          <hr class="my-3">
+          <div class="section-label mb-2">Key ECMO-CO Features in This Scenario</div>
+          <div class="eco-feature"><strong>Three-cannula circuit aggregate</strong> — <code>ecmo-co:ECMOCircuit</code> has three <code>ecmo-co:Cannula</code> members via <code>bfo:0000178</code>: FemV (drainage), FemA (return), DistalPerfCath (distal perfusion). The aggregate also lists the pump, the oxygenator and three tubing segments.</div>
+          <div class="eco-feature"><strong>ReturnRole without ReturnFunction on the distal perfusion catheter</strong> — the catheter's <code>LumenConduit</code> bears a <code>ReturnRole</code> but no <code>ReturnFunction</code>. ECMO-CO keeps design intent (Function) apart from configured use (Role); this scenario asserts the role and no function for the catheter.</div>
+          <div class="eco-feature"><strong>VA-mode CannulationConfiguration GDC</strong> — <code>ecmo-co:VA-mode</code> asserted; the distal perfusion catheter is included in <code>ecmo-co:isAbout</code>, so it is queryable as part of the epoch record. The ELSO Registry records such a catheter as a cannula entry with Initial Purpose "Distal reperfusion catheter (DPC)".</div>
+          <div class="eco-feature"><strong>Arterial access anatomy</strong> — the TBox defines <code>ecmo-co:AccessArtery</code> (an artery used as the insertion vessel for a V-A return cannula), but this scenario does not use it: the femoral sites appear only in cannula labels.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">Circuit Diagram &amp; Instance Network</div>
+          <svg viewBox="0 0 620 340" width="100%" style="background:#1A1A2E; border-radius:8px; border:1px solid #263238;">
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#90CAF9"/>
+              </marker>
+              <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#A5D6A7"/>
+              </marker>
+              <marker id="arro" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#FFE082"/>
+              </marker>
+              <marker id="arry" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#EF9A9A"/>
+              </marker>
+            </defs>
+
+            <text x="310" y="14" text-anchor="middle" font-size="9" fill="#546E7A">CIRCUIT FLOW (schematic)</text>
+
+            <!-- Patient (venous) -->
+            <rect x="10" y="24" width="64" height="40" rx="5" fill="#C62828"/>
+            <text x="42" y="40" text-anchor="middle" font-size="8.5" fill="white" font-weight="bold">PATIENT</text>
+            <text x="42" y="52" text-anchor="middle" font-size="7" fill="#FFCDD2">R FemV</text>
+            <text x="42" y="62" text-anchor="middle" font-size="7" fill="#FFCDD2">drainage</text>
+
+            <!-- FemV cannula -->
+            <rect x="84" y="28" width="64" height="32" rx="4" fill="#1565C0"/>
+            <text x="116" y="42" text-anchor="middle" font-size="8" fill="white">FemV 25Fr</text>
+            <text x="116" y="53" text-anchor="middle" font-size="7" fill="#BBDEFB">drainage</text>
+
+            <!-- Drain tubing -->
+            <rect x="158" y="32" width="52" height="22" rx="4" fill="#37474F"/>
+            <text x="184" y="46" text-anchor="middle" font-size="7.5" fill="#B0BEC5">Drain tube</text>
+
+            <!-- Pump -->
+            <rect x="220" y="24" width="52" height="34" rx="5" fill="#4CAF50"/>
+            <text x="246" y="38" text-anchor="middle" font-size="8" fill="white" font-weight="bold">PUMP</text>
+            <text x="246" y="50" text-anchor="middle" font-size="7" fill="#C8E6C9">centrif.</text>
+
+            <!-- Post-pump tubing -->
+            <rect x="282" y="32" width="50" height="22" rx="4" fill="#37474F"/>
+            <text x="307" y="46" text-anchor="middle" font-size="7.5" fill="#B0BEC5">Tubing</text>
+
+            <!-- Oxygenator -->
+            <rect x="342" y="22" width="58" height="42" rx="5" fill="#7B1FA2"/>
+            <text x="371" y="38" text-anchor="middle" font-size="8" fill="white" font-weight="bold">OXY</text>
+            <text x="371" y="50" text-anchor="middle" font-size="7" fill="#E1BEE7">PMP</text>
+            <text x="371" y="60" text-anchor="middle" font-size="7" fill="#E1BEE7">membrane</text>
+
+            <!-- Return tubing -->
+            <rect x="410" y="32" width="52" height="22" rx="4" fill="#37474F"/>
+            <text x="436" y="46" text-anchor="middle" font-size="7.5" fill="#B0BEC5">Ret tube</text>
+
+            <!-- Y-connector -->
+            <rect x="472" y="24" width="42" height="34" rx="4" fill="#455A64"/>
+            <text x="493" y="38" text-anchor="middle" font-size="7.5" fill="white">Y-conn</text>
+            <text x="493" y="49" text-anchor="middle" font-size="7" fill="#B0BEC5">splitter</text>
+
+            <!-- FemA return cannula -->
+            <rect x="524" y="24" width="62" height="34" rx="4" fill="#E65100"/>
+            <text x="555" y="38" text-anchor="middle" font-size="8" fill="white">FemA 17Fr</text>
+            <text x="555" y="50" text-anchor="middle" font-size="7" fill="#FFE0B2">L fem artery</text>
+            <text x="555" y="60" text-anchor="middle" font-size="7" fill="#FFE0B2">return</text>
+
+            <!-- Distal perf catheter branch (below Y) -->
+            <rect x="472" y="76" width="62" height="30" rx="4" fill="#B71C1C"/>
+            <text x="503" y="88" text-anchor="middle" font-size="7.5" fill="white">DistalPerf 8Fr</text>
+            <text x="503" y="100" text-anchor="middle" font-size="7" fill="#FFCDD2">L SFA anterograde</text>
+
+            <!-- Arrows -->
+            <line x1="74" y1="44" x2="84" y2="44" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="148" y1="44" x2="158" y2="44" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="210" y1="44" x2="220" y2="44" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="272" y1="44" x2="282" y2="44" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="332" y1="44" x2="342" y2="44" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="400" y1="44" x2="410" y2="44" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="462" y1="44" x2="472" y2="44" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="514" y1="44" x2="524" y2="44" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <!-- Y branch down -->
+            <line x1="493" y1="58" x2="493" y2="76" stroke="#EF9A9A" stroke-width="1.5" marker-end="url(#arry)"/>
+            <text x="500" y="72" font-size="7" fill="#EF9A9A">distal</text>
+            <text x="500" y="80" font-size="7" fill="#EF9A9A">perf</text>
+
+            <!-- Legend -->
+            <text x="10" y="118" font-size="8" fill="#90CAF9">— deoxygenated</text>
+            <text x="105" y="118" font-size="8" fill="#A5D6A7">— post-pump</text>
+            <text x="190" y="118" font-size="8" fill="#FFE082">— oxygenated</text>
+            <text x="270" y="118" font-size="8" fill="#EF9A9A">— distal perf branch</text>
+
+            <!-- Instance network divider -->
+            <line x1="10" y1="128" x2="610" y2="128" stroke="#263238" stroke-width="1"/>
+            <text x="310" y="140" text-anchor="middle" font-size="9" fill="#546E7A">ECMO-CO INSTANCE NETWORK (schematic of the scenario's individuals)</text>
+
+            <!-- Cannula nodes -->
+            <ellipse cx="120" cy="185" rx="52" ry="18" fill="#1565C0" opacity="0.85"/>
+            <text x="120" y="182" text-anchor="middle" font-size="7.5" fill="white">Cannula_FemV_25Fr</text>
+            <text x="120" y="193" text-anchor="middle" font-size="7" fill="#BBDEFB">ecmo-co:Cannula</text>
+
+            <ellipse cx="310" cy="185" rx="52" ry="18" fill="#E65100" opacity="0.85"/>
+            <text x="310" y="182" text-anchor="middle" font-size="7.5" fill="white">Cannula_FemA_17Fr</text>
+            <text x="310" y="193" text-anchor="middle" font-size="7" fill="#FFE0B2">ecmo-co:Cannula</text>
+
+            <ellipse cx="500" cy="185" rx="54" ry="18" fill="#B71C1C" opacity="0.85"/>
+            <text x="500" y="182" text-anchor="middle" font-size="7.5" fill="white">DistalPerfCath_8Fr</text>
+            <text x="500" y="193" text-anchor="middle" font-size="7" fill="#FFCDD2">ecmo-co:Cannula</text>
+
+            <!-- LumenConduit nodes -->
+            <ellipse cx="120" cy="255" rx="52" ry="17" fill="#42A5F5" opacity="0.85"/>
+            <text x="120" y="252" text-anchor="middle" font-size="7.5" fill="white">LC_FemV</text>
+            <text x="120" y="263" text-anchor="middle" font-size="7" fill="#E3F2FD">FiatObjectPart</text>
+
+            <ellipse cx="310" cy="255" rx="52" ry="17" fill="#42A5F5" opacity="0.85"/>
+            <text x="310" y="252" text-anchor="middle" font-size="7.5" fill="white">LC_FemA</text>
+            <text x="310" y="263" text-anchor="middle" font-size="7" fill="#E3F2FD">FiatObjectPart</text>
+
+            <ellipse cx="500" cy="255" rx="54" ry="17" fill="#42A5F5" opacity="0.85"/>
+            <text x="500" y="252" text-anchor="middle" font-size="7.5" fill="white">LC_DistalPerf</text>
+            <text x="500" y="263" text-anchor="middle" font-size="7" fill="#E3F2FD">FiatObjectPart</text>
+
+            <!-- Role badges -->
+            <rect x="65" y="293" width="70" height="20" rx="3" fill="#26A69A"/>
+            <text x="100" y="307" text-anchor="middle" font-size="7.5" fill="white">DrainageRole</text>
+            <rect x="258" y="293" width="62" height="20" rx="3" fill="#26A69A"/>
+            <text x="289" y="307" text-anchor="middle" font-size="7.5" fill="white">ReturnRole</text>
+            <rect x="448" y="293" width="62" height="20" rx="3" fill="#26A69A"/>
+            <text x="479" y="307" text-anchor="middle" font-size="7.5" fill="white">ReturnRole</text>
+            <!-- No ReturnFunction badge for distal perf -->
+            <rect x="448" y="317" width="104" height="17" rx="3" fill="#37474F"/>
+            <text x="500" y="329" text-anchor="middle" font-size="7" fill="#B0BEC5">no ReturnFunction ← key</text>
+
+            <!-- part-of lines -->
+            <line x1="120" y1="203" x2="120" y2="238" stroke="#BBDEFB" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+            <line x1="310" y1="203" x2="310" y2="238" stroke="#BBDEFB" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+            <line x1="500" y1="203" x2="500" y2="238" stroke="#BBDEFB" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+            <!-- bears lines to roles -->
+            <line x1="120" y1="272" x2="100" y2="293" stroke="#26A69A" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="310" y1="272" x2="289" y2="293" stroke="#26A69A" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="500" y1="272" x2="479" y2="293" stroke="#26A69A" stroke-width="1" marker-end="url(#arr)"/>
+            <text x="138" y="286" font-size="6.5" fill="#26A69A">ecmo-co:bears</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELSO comparison -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="section-label mb-3">ELSO Registry vs ECMO-CO Representational Comparison</div>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="table-dark">
+                <tr><th style="width:24%">Concept</th><th>ELSO Registry (2026 form and data definitions)</th><th>ECMO-CO (this scenario)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mode</td><td>ECLS mode V-A</td><td><code>ecmo-co:VA-mode</code> on the <code>CannulationConfiguration</code>, with <code>ecmo-co:startedAt</code></td></tr>
+                <tr><td>Cannulae, including the distal perfusion catheter</td><td>One entry per cannula (the form has slots for ten), each with site, size and Initial Purpose; the distal perfusion catheter is an entry with purpose DPC</td><td>Three <code>ecmo-co:Cannula</code> members of the circuit aggregate, all three in the configuration's <code>ecmo-co:isAbout</code></td></tr>
+                <tr><td>Design intent vs configured use</td><td>An Initial Purpose per cannula; a later change of purpose is entered with its date and time</td><td>Function (design intent) and Role (configured use) are separate realizables on each <code>LumenConduit</code>; the distal perfusion catheter's <code>LumenConduit</code> bears a <code>ReturnRole</code> and no <code>ReturnFunction</code></td></tr>
+                <tr><td>Access site</td><td>Site code per cannula, e.g. RFV (right femoral vein), LFA (left femoral artery), LSFA (left superficial femoral artery)</td><td>Not asserted in this scenario: the femoral sites appear only in cannula labels</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-muted mt-2 mb-0">ELSO column: ELSO ECLS Registry Form v12.0 (01/12/2026), cannulation section; ELSO Registry Data Definitions (04/15/2026), cannulation Site and Initial Purpose fields.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RDF + SPARQL -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">ECMO-CO ABox — Formal Encoding (Turtle/RDF)</div>
+          <pre class="rdf" data-ecmoco-illustrative><span class="comment"># Scenario (synthetic) — Peripheral V-A: femoral vein/artery + distal perfusion. Excerpt.</span>
+<span class="comment"># Namespace declarations omitted.</span>
+
+<span class="eco">:Patient_VA01</span>       <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Patient</span> .
+
+<span class="eco">:Cannula_FemV_25Fr</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Cannula</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Right common femoral vein drainage cannula, 25 Fr"@en</span> .
+
+<span class="eco">:Cannula_FemA_17Fr</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Cannula</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Left common femoral artery return cannula, 17 Fr"@en</span> .
+
+<span class="eco">:DistalPerfCath_8Fr</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Cannula</span> ;
+    <span class="prop">rdfs:label</span>   <span class="lit">"Distal limb perfusion catheter, 8 Fr (anterograde, left SFA)"@en</span> ;
+    <span class="prop">rdfs:comment</span> <span class="lit">"Adjunctive: prevents leg ischaemia distal to the arterial cannula. Branches off the return limb via a Y-connector."@en</span> .
+
+<span class="comment"># ── LumenConduits — the distal perfusion one bears a ReturnRole and no ReturnFunction ──</span>
+<span class="eco">:LumenConduit_FemV</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:LumenConduit</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:Cannula_FemV_25Fr</span> ;
+    <span class="prop">ecmo-co:bears</span>   <span class="eco">:DrainageFunction_FemV</span> , <span class="eco">:DrainageRole_FemV</span> .
+
+<span class="eco">:LumenConduit_FemA</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:LumenConduit</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:Cannula_FemA_17Fr</span> ;
+    <span class="prop">ecmo-co:bears</span>   <span class="eco">:ReturnFunction_FemA</span> , <span class="eco">:ReturnRole_FemA</span> .
+
+<span class="eco">:LumenConduit_DistalPerf</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:LumenConduit</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:DistalPerfCath_8Fr</span> ;
+    <span class="prop">ecmo-co:bears</span>   <span class="eco">:ReturnRole_DistalPerf</span> .
+
+<span class="comment"># ── Circuit aggregate includes all three cannulae ──</span>
+<span class="eco">:Circuit_VA01</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:ECMOCircuit</span> ;
+    <span class="prop">bfo:0000178</span>  <span class="eco">:Cannula_FemV_25Fr</span> , <span class="eco">:Cannula_FemA_17Fr</span> ,
+                 <span class="eco">:DistalPerfCath_8Fr</span> ,
+                 <span class="eco">:Pump_VA01</span> , <span class="eco">:Oxy_VA01</span> ,
+                 <span class="eco">:Tubing_Drain_VA01</span> , <span class="eco">:Tubing_Return_VA01</span> ,
+                 <span class="eco">:Tubing_DistalPerf</span> .
+
+<span class="comment"># ── Configuration GDC ──</span>
+<span class="eco">:CannulationConfig_VA01_Epoch1</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulationConfiguration</span> ;
+    <span class="prop">ecmo-co:hasModeAssertion</span>  <span class="eco">ecmo-co:VA-mode</span> ;
+    <span class="prop">ecmo-co:startedAt</span>  <span class="lit">"2026-05-11T03:45:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:isAbout</span>  <span class="eco">:Patient_VA01</span> , <span class="eco">:Cannula_FemV_25Fr</span> ,
+                 <span class="eco">:Cannula_FemA_17Fr</span> , <span class="eco">:DistalPerfCath_8Fr</span> ,
+                 <span class="eco">:Circuit_VA01</span> .
+</pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">SPARQL Competency Queries</div>
+
+          <p class="small text-muted mb-2"><strong>Q1 — List all cannulae in the circuit, their role type, and whether a matching function is borne</strong></p>
+          <pre class="sparql"><span class="cmt"># Namespace declarations omitted.</span>
+<span class="kw">SELECT</span> <span class="var">?cannula</span> <span class="var">?roleType</span> <span class="var">?hasFunction</span>
+<span class="kw">WHERE</span> {
+  <span class="var">?circuit</span> <span class="uri">bfo:0000178</span> <span class="var">?cannula</span> .
+  <span class="var">?lc</span>      <span class="uri">bfo:0000176</span> <span class="var">?cannula</span> ;
+           <span class="uri">ecmo-co:bears</span>   <span class="var">?role</span> .
+  <span class="var">?role</span>    <span class="uri">rdf:type</span>    <span class="var">?roleType</span> .
+  <span class="kw">FILTER</span>(<span class="var">?roleType</span> <span class="kw">IN</span> (
+    <span class="uri">ecmo-co:DrainageRole</span>, <span class="uri">ecmo-co:ReturnRole</span>))
+  <span class="kw">BIND</span>(<span class="kw">IF</span>(<span class="var">?roleType</span> = <span class="uri">ecmo-co:DrainageRole</span>,
+    <span class="uri">ecmo-co:DrainageFunction</span>, <span class="uri">ecmo-co:ReturnFunction</span>) <span class="kw">AS</span> <span class="var">?fnType</span>)
+  <span class="kw">OPTIONAL</span> {
+    <span class="var">?lc</span> <span class="uri">ecmo-co:bears</span> <span class="var">?fn</span> .
+    <span class="var">?fn</span> <span class="uri">rdf:type</span>  <span class="var">?fnType</span> .
+    <span class="kw">BIND</span>(<span class="uri">true</span> <span class="kw">AS</span> <span class="var">?hasFunction</span>)
+  }
+}
+<span class="kw">ORDER BY</span> <span class="var">?cannula</span></pre>
+          <div class="query-result">?cannula            | ?roleType            | ?hasFunction
+--------------------|----------------------|-------------
+:Cannula_FemA_17Fr  | ecmo-co:ReturnRole   | true
+:Cannula_FemV_25Fr  | ecmo-co:DrainageRole | true
+:DistalPerfCath_8Fr | ecmo-co:ReturnRole   | (unbound)</div>
+          <p class="small text-muted mt-2 mb-0">The distal perfusion catheter's lumen conduit bears a <code>ReturnRole</code> with no matching <code>ReturnFunction</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav footer -->
+  <div class="d-flex justify-content-between mt-2">
+    <a href="avalon.html" class="btn btn-outline-secondary btn-sm">← Prev: AVALON</a>
+    <a href="index.html" class="btn btn-outline-secondary btn-sm">All Examples</a>
+    <a href="va-central.html" class="btn btn-outline-primary btn-sm">Next: V-A Central →</a>
+  </div>
+
+  <div data-ecmoco-disclaimer class="small text-muted border-top pt-3 mt-4">
+    Research prototype; not clinical guidance. The scenario on this page is synthetic: an invented case, not derived from any patient record. The RDF block is an excerpt of the scenario file; each query result shown is what the query returns over that scenario plus the ECMO-CO v0.1 ontology. Not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+
+</div>
+
+<footer class="small text-muted text-center py-3"><span>ECMO-CO project, Stony Brook University</span> · <span>Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

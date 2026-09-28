@@ -1,0 +1,429 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — Ontology Graph</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1A1A2E; color: #E0E0E0; margin: 0; overflow: hidden; }
+    #topbar { background: #0D1B2A; border-bottom: 1px solid #263238; padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 1rem; height: 52px; }
+    #topbar a { color: #90CAF9; font-size: 0.85rem; text-decoration: none; }
+    #topbar a:hover { text-decoration: underline; }
+    #topbar .title { color: #E3F2FD; font-weight: 700; font-size: 1rem; }
+    #graph-container { position: relative; }
+    svg { display: block; }
+    .node circle { stroke-width: 2; cursor: pointer; }
+    .node circle.ready { stroke: rgba(255,255,255,0.3); }
+    .node circle.pending { stroke: rgba(255,255,255,0.15); stroke-dasharray: 4,3; }
+    .node text { font-size: 10px; fill: #E0E0E0; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
+    .node.bfo circle { opacity: 0.6; }
+    .link { stroke: rgba(255,255,255,0.18); stroke-width: 1.5; fill: none; }
+    .link.subclassof { marker-end: url(#arrow); }
+    #info-panel {
+      position: fixed; top: 52px; right: 0; width: 300px;
+      height: calc(100vh - 52px);
+      background: #0D1B2A; border-left: 1px solid #263238;
+      padding: 1.2rem; overflow-y: auto; font-size: 0.88rem;
+      transform: translateX(100%); transition: transform 0.25s ease;
+      z-index: 10;
+    }
+    #info-panel.open { transform: translateX(0); }
+    #info-panel .class-id { font-family: monospace; font-size: 0.8rem; color: #90CAF9; margin-bottom: 0.5rem; }
+    #info-panel .class-label { font-size: 1.1rem; font-weight: 700; color: #E3F2FD; margin-bottom: 0.3rem; }
+    #info-panel .bfo-parent { font-size: 0.82rem; color: #B0BEC5; margin-bottom: 0.8rem; }
+    #info-panel .def { color: #CFD8DC; line-height: 1.55; margin-bottom: 0.8rem; }
+    #info-panel .status-badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    #info-panel .status-ready { background: #1B5E20; color: #A5D6A7; }
+    #info-panel .status-pending { background: #37474F; color: #90A4AE; }
+    #info-panel .close-btn { float: right; background: none; border: none; color: #90CAF9; cursor: pointer; font-size: 1.1rem; }
+    #legend {
+      position: fixed; bottom: 1rem; left: 1rem;
+      background: rgba(13,27,42,0.92); border: 1px solid #263238;
+      border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.78rem;
+      z-index: 10;
+    }
+    #legend .l-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 3px; }
+    #legend .l-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    #legend .l-bfo { border: 2px solid rgba(255,255,255,0.3); }
+    #instructions {
+      position: fixed; top: 62px; left: 10px;
+      background: rgba(13,27,42,0.85); border: 1px solid #263238;
+      border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.75rem; color: #90A4AE;
+    }
+    #controls {
+      position: fixed; top: 62px; right: 10px;
+      display: flex; gap: 0.4rem; z-index: 5;
+    }
+    #controls button {
+      background: rgba(13,27,42,0.9); border: 1px solid #37474F;
+      color: #90CAF9; border-radius: 5px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer;
+    }
+    #controls button:hover { background: #1E3A5F; }
+    .ecmoco-banner { margin-left: auto; background: #FFF8E1; color: #5D4037; border-radius: 10px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; }
+    #site-note {
+      position: fixed; bottom: 0.6rem; right: 0.6rem; max-width: 420px;
+      background: rgba(13,27,42,0.92); border: 1px solid #263238; border-radius: 6px;
+      padding: 0.4rem 0.7rem; font-size: 0.7rem; color: #90A4AE; z-index: 5;
+    }
+    #site-note footer { margin-top: 3px; color: #607D8B; }
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="../index.html">← ECMO-CO Home</a>
+  <span class="title">ECMO-CO — Ontology Class Graph</span>
+  <span style="color:#607D8B; font-size:0.8rem">BFO 2020 · Phase 1 v0.1 · 36 classes across the two ontology files</span>
+  <span data-ecmoco-banner class="ecmoco-banner">Research demonstrator (pilot)</span>
+</div>
+
+<div id="graph-container">
+  <svg id="graph"></svg>
+</div>
+
+<div id="info-panel">
+  <button class="close-btn" onclick="closePanel()">✕</button>
+  <div id="panel-content"></div>
+</div>
+
+<div id="legend">
+  <div style="font-weight:700; color:#E3F2FD; margin-bottom:6px; font-size:0.8rem">BFO Branch</div>
+  <div class="l-row"><div class="l-dot" style="background:#607D8B"></div><span style="color:#B0BEC5">BFO anchor</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#1565C0"></div><span>ObjectAggregate</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#1976D2"></div><span>Object</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#42A5F5"></div><span>FiatObjectPart</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#00BCD4"></div><span>Site (Immaterial)</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#7B1FA2"></div><span>GDC (Info Record)</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#2E7D32"></div><span>Quality / RelationalQuality</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#00695C"></div><span>Function</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#26A69A"></div><span>Role</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#E65100"></div><span>Process</span></div>
+  <div class="l-row"><div class="l-dot" style="background:#C62828"></div><span>Material entity: patient, anatomy, circuit blood</span></div>
+  <div style="margin-top:8px; color:#607D8B; border-top:1px solid #263238; padding-top:6px">
+    <div class="l-row"><div class="l-dot" style="background:#444; border:2px solid rgba(255,255,255,0.3)"></div><span>Curation status: ready</span></div>
+    <div class="l-row"><div class="l-dot" style="background:#333; border:2px dashed rgba(255,255,255,0.2)"></div><span>Curation status: pending</span></div>
+  </div>
+</div>
+
+<div id="instructions">Click any node to view definition · Drag to reposition · Scroll to zoom</div>
+
+<div id="controls">
+  <button onclick="resetZoom()">Reset View</button>
+  <button onclick="toggleBFO()">Toggle BFO anchors</button>
+</div>
+
+<defs>
+  <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="rgba(255,255,255,0.3)"/>
+  </marker>
+</defs>
+
+<div id="site-note">
+  <div data-ecmoco-disclaimer>Research prototype, not clinical guidance. All scenarios and patients in the worked examples are synthetic. Not an official Stony Brook University website. All rights reserved pending institutional licensing.</div>
+  <footer>ECMO-CO project, Stony Brook University · Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+
+const COLOR = {
+  bfo:       "#607D8B",
+  aggregate: "#1565C0",
+  object:    "#1976D2",
+  fiatpart:  "#42A5F5",
+  site:      "#00BCD4",
+  gdc:       "#7B1FA2",
+  quality:   "#2E7D32",
+  function:  "#00695C",
+  role:      "#26A69A",
+  process:   "#E65100",
+  patient:   "#C62828"
+};
+
+const RADIUS = { bfo: 14, eco: 10 };
+
+const nodes = [
+  // ── BFO anchors ──
+  { id:"bfo:ObjectAggregate", label:"ObjectAggregate", group:"bfo", bfoLabel:"BFO:0000027", def:"(Elucidation) An object aggregate is a material entity consisting exactly of a plurality (≥1) of objects as member parts which together form a unit" },
+  { id:"bfo:Object", label:"Object", group:"bfo", bfoLabel:"BFO:0000030", def:"(Elucidation) An object is a material entity which manifests causal unity & is of a type instances of which are maximal relative to the sort of causal unity manifested" },
+  { id:"bfo:FiatObjectPart", label:"FiatObjectPart", group:"bfo", bfoLabel:"BFO:0000024", def:"(Elucidation) A fiat object part b is a material entity & such that if b exists then it is continuant part of some object c & demarcated from the remainder of c by one or more fiat surfaces" },
+  { id:"bfo:Site", label:"Site", group:"bfo", bfoLabel:"BFO:0000029", def:"(Elucidation) A site is a three-dimensional immaterial entity whose boundaries either (partially or wholly) coincide with the boundaries of one or more material entities or have locations determined in relation to some material entity" },
+  { id:"bfo:GDC", label:"GDC", group:"bfo", bfoLabel:"BFO:0000031", def:"(Elucidation) A generically dependent continuant is an entity that exists in virtue of the fact that there is at least one of what may be multiple copies which is the content or the pattern that multiple copies would share" },
+  { id:"bfo:RelationalQuality", label:"RelationalQuality", group:"bfo", bfoLabel:"BFO:0000145", def:"b is a relational quality =Def b is a quality & there exists c and d such that c and d are not identical & b specifically depends on c & b specifically depends on d" },
+  { id:"bfo:Function", label:"Function", group:"bfo", bfoLabel:"BFO:0000034", def:"(Elucidation) A function is a disposition that exists in virtue of its bearer's physical make-up & this physical make-up is something the bearer possesses because it came into being either through evolution (in the case of natural biological entities) or through intentional design (in the case of artefacts) in order to realize processes of a certain sort" },
+  { id:"bfo:Role", label:"Role", group:"bfo", bfoLabel:"BFO:0000023", def:"(Elucidation) A role b is a realizable entity such that b exists because there is some single bearer that is in some special physical, social, or institutional set of circumstances in which this bearer does not have to be & b is not such that, if it ceases to exist, then the physical make-up of the bearer is thereby changed" },
+  { id:"bfo:Process", label:"Process", group:"bfo", bfoLabel:"BFO:0000015", def:"(Elucidation) p is a process means p is an occurrent that has some temporal proper part and for some time t, p has some material entity as participant" },
+  { id:"bfo:MaterialEntity", label:"MaterialEntity", group:"bfo", bfoLabel:"BFO:0000040", def:"(Elucidation) A material entity is an independent continuant that at all times at which it exists has some portion of matter as continuant part" },
+  { id:"bfo:Quality", label:"Quality", group:"bfo", bfoLabel:"BFO:0000019", def:"(Elucidation) A quality is a specifically dependent continuant that, in contrast to roles and dispositions, does not require any further process in order to be realized" },
+  // ── ecmo-co: ObjectAggregate branch ──
+  { id:"ecmo-co:ECMOCircuit", label:"ECMOCircuit", group:"aggregate", status:"ready",
+    def:"An object aggregate composed of all the discrete circuit components (cannulae, blood pump, oxygenator, tubing, ports, sensors) that together implement extracorporeal membrane oxygenation for one patient at a time.",
+    bfoLabel:"⊑ BFO:ObjectAggregate" },
+  { id:"ecmo-co:CircuitSegment", label:"CircuitSegment", group:"aggregate", status:"ready",
+    def:"A sub-aggregate of an ECMO circuit whose membership is fixed by clinical or engineering convention (e.g., 'pre-oxygenator segment', 'arterial limb'). Each member is itself a circuit component object.",
+    bfoLabel:"⊑ BFO:ObjectAggregate" },
+  { id:"ecmo-co:PatientCircuitAssembly", label:"PatientCircuitAssembly", group:"aggregate", status:"pending",
+    def:"A transient object aggregate whose member parts are exactly one ecmo-co:Patient and exactly one ecmo-co:ECMOCircuit during the contiguous time interval at which they are connected via cannulation. The aggregate begins to exist at cannulation and ceases at decannulation.",
+    bfoLabel:"⊑ BFO:ObjectAggregate" },
+  // ── ecmo-co: Object branch ──
+  { id:"ecmo-co:CircuitComponent", label:"CircuitComponent", group:"object", status:"ready",
+    def:"A discrete, individually separable physical artifact that is or may be a member part of an ECMO circuit and that bears one or more device functions or roles within that circuit.",
+    bfoLabel:"⊑ BFO:Object" },
+  { id:"ecmo-co:Cannula", label:"Cannula", group:"object", status:"ready",
+    def:"A circuit component that is a hollow tubular medical device inserted through a vascular access site to permit blood drainage from or return to the patient circulation. A cannula has one or more LumenConduit fiat parts and one or more CannulaLumen sites.",
+    bfoLabel:"⊑ ecmo-co:CircuitComponent" },
+  { id:"ecmo-co:BloodPump", label:"BloodPump", group:"object", status:"ready",
+    def:"A circuit component whose function is to generate the pressure gradient that drives blood flow through the ECMO circuit.",
+    bfoLabel:"⊑ ecmo-co:CircuitComponent" },
+  { id:"ecmo-co:Oxygenator", label:"Oxygenator", group:"object", status:"ready",
+    def:"A circuit component whose function is to perform extracorporeal gas exchange — oxygenation of and carbon dioxide removal from the blood passing through its hollow-fibre membrane bundle.",
+    bfoLabel:"⊑ ecmo-co:CircuitComponent" },
+  { id:"ecmo-co:CircuitTubing", label:"CircuitTubing", group:"object", status:"ready",
+    def:"A circuit component that is a flexible hollow tube (typically PVC or silicone) connecting two named devices in the ECMO circuit and conducting blood between them.",
+    bfoLabel:"⊑ ecmo-co:CircuitComponent" },
+  { id:"ecmo-co:Port", label:"Port", group:"object", status:"ready",
+    def:"A circuit component that is the physical connector hardware on the surface of a parent device, providing the material site at which a PhysicalInterface relational quality may come to inhere when mated with another Port.",
+    bfoLabel:"⊑ ecmo-co:CircuitComponent" },
+  // ── ecmo-co: FiatObjectPart branch ──
+  { id:"ecmo-co:LumenConduit", label:"LumenConduit", group:"fiatpart", status:"ready",
+    def:"A fiat object part of a cannula that consists of the material wall structure bounding exactly one CannulaLumen site, and that bears the drainage and/or return functions and roles attributable to that lumen.",
+    bfoLabel:"⊑ BFO:FiatObjectPart" },
+  { id:"ecmo-co:CannulaTip", label:"CannulaTip", group:"fiatpart", status:"ready",
+    def:"A fiat object part of a cannula consisting of the most distal portion that comes into contact with the patient's intravascular space and that may bear DrainageRole or ReturnRole depending on circuit configuration.",
+    bfoLabel:"⊑ BFO:FiatObjectPart" },
+  { id:"ecmo-co:FenestrationRim", label:"FenestrationRim", group:"fiatpart", status:"pending",
+    def:"A fiat object part of a LumenConduit consisting of the material wall surrounding and bounding a single CannulaFenestration through-hole.",
+    bfoLabel:"⊑ BFO:FiatObjectPart" },
+  // ── ecmo-co: Site branch ──
+  { id:"ecmo-co:CannulaLumen", label:"CannulaLumen", group:"site", status:"ready",
+    def:"A site that is the immaterial interior channel of a cannula, bounded by exactly one LumenConduit, and serving as the spatial venue for blood flow processes through that lumen.",
+    bfoLabel:"⊑ BFO:Site" },
+  { id:"ecmo-co:CannulaFenestration", label:"CannulaFenestration", group:"site", status:"ready",
+    def:"A site that is an immaterial through-hole in the wall of a LumenConduit, bounded by a fiat-defined material rim, and serving as a local entry or exit point for blood between the cannula's interior lumen and the surrounding intravascular space.",
+    bfoLabel:"⊑ BFO:Site" },
+  { id:"ecmo-co:AnatomicalSpace", label:"AnatomicalSpace", group:"site", status:"ready",
+    def:"An immaterial anatomical entity of the patient's body whose boundaries coincide with the boundaries of one or more bounding anatomical structures, and that may serve as the spatial venue for cannula tip positioning or blood flow.",
+    bfoLabel:"⊑ BFO:Site" },
+  // ── ecmo-co: GDC branch ──
+  { id:"ecmo-co:CannulationConfiguration", label:"CannulationConfig", group:"gdc", status:"ready",
+    def:"A generically dependent continuant that is an information record describing one stable configuration epoch of an ECMO run — the set of components, ports, lumen role assignments, anatomical placements, and reified circuit connections in force during a contiguous interval of time.",
+    bfoLabel:"⊑ BFO:GDC" },
+  { id:"ecmo-co:CircuitConnection", label:"CircuitConnection", group:"gdc", status:"pending",
+    def:"A generically dependent continuant that is an information record reifying the directed mating of one ecmo-co:Port to another, encoding flow direction, ordinal position within the circuit, and the temporal interval during which the corresponding PhysicalInterface relational quality was instantiated.",
+    bfoLabel:"⊑ BFO:GDC" },
+  { id:"ecmo-co:RecordedConnection", label:"RecordedConnection", group:"gdc", status:"pending",
+    def:"A circuit connection record whose corresponding PhysicalInterface is no longer instantiated (the bearers have been disconnected). Used for retrospective query and audit.",
+    bfoLabel:"⊑ ecmo-co:CircuitConnection" },
+  { id:"ecmo-co:ConfigurationMode", label:"ConfigurationMode", group:"gdc", status:"pending",
+    def:"An information-content classifier denoting an ECMO cannulation mode (V-V, V-A, V-AV, V-VA, etc.). Phase 1 placeholder; Phase 2 candidate: iao:InformationContentEntity subclass.",
+    bfoLabel:"⊑ BFO:GDC" },
+  // ── ecmo-co: Quality / RelationalQuality branch ──
+  { id:"ecmo-co:PhysicalInterface", label:"PhysicalInterface", group:"quality", status:"ready",
+    def:"A relational quality that is jointly borne by two or more independent continuants — none a spatial region, no two sharing any common parts — in virtue of a direct, blood-relevant physical relationship holding between them where they meet, and that ceases when that relationship ceases. The relationship takes one of two forms, captured by the disjoint subclasses: (i) physical APPOSITION of two material surfaces (ecmo-co:CircuitInterface, ecmo-co:DeviceTissueInterface), or (ii) open, blood-conducting SPATIAL CONTINUITY between two immaterial sites (ecmo-co:SpatialContinuityInterface). The genus is the joint physical fact of being interfaced; the differentia is apposition-of-surfaces versus continuity-of-spaces.",
+    bfoLabel:"⊑ BFO:RelationalQuality" },
+  { id:"ecmo-co:CircuitInterface", label:"CircuitInterface", group:"quality", status:"ready",
+    def:"A physical interface whose two bearers are both ecmo-co:Port instances on circuit components (artifact-to-artifact mating).",
+    bfoLabel:"⊑ ecmo-co:PhysicalInterface" },
+  { id:"ecmo-co:DeviceTissueInterface", label:"DeviceTissueInterface", group:"quality", status:"ready",
+    def:"A physical interface whose bearers are an ecmo-co:Cannula (or its CannulaTip / external surface) and an anatomical material entity (vessel wall, intravascular space surface).",
+    bfoLabel:"⊑ ecmo-co:PhysicalInterface" },
+  { id:"ecmo-co:SpatialContinuityInterface", label:"SpatialContinuityInterface", group:"quality", status:"ready",
+    def:"A physical interface that is the patent, blood-conducting spatial continuity jointly borne by two or more immaterial ECMO-CO Sites (ecmo-co:CannulaLumen, ecmo-co:CannulaFenestration, or ecmo-co:AnatomicalSpace) that are in open communication across a material-bounded aperture, holding at all times at which those sites are unoccluded and open to one another so that blood may transit between them, and ceasing when the communication is lost (occlusion, closure, or separation). Neither bearer is material; neither is a Port.",
+    bfoLabel:"⊑ ecmo-co:PhysicalInterface" },
+  { id:"ecmo-co:CircuitBloodPressure", label:"CircuitBloodPressure", group:"quality", status:"ready",
+    def:"A quality that inheres in a portion of circuit blood and that is the pressure that portion of blood exerts at the place in the extracorporeal circuit it occupies at a given time.",
+    bfoLabel:"⊑ BFO:Quality" },
+  // ── ecmo-co: Function branch ──
+  { id:"ecmo-co:DrainageFunction", label:"DrainageFunction", group:"function", status:"ready",
+    def:"A function that inheres in a LumenConduit (or CannulaTip) at all times at which it exists, in virtue of which the bearing material is disposed to conduct blood out of the patient's circulation when the lumen is included in an active ECMO flow path.",
+    bfoLabel:"⊑ BFO:Function" },
+  { id:"ecmo-co:ReturnFunction", label:"ReturnFunction", group:"function", status:"ready",
+    def:"A function that inheres in a LumenConduit (or CannulaTip) at all times at which it exists, in virtue of which the bearing material is disposed to conduct blood back into the patient's circulation when the lumen is included in an active ECMO flow path.",
+    bfoLabel:"⊑ BFO:Function" },
+  // ── ecmo-co: Role branch ──
+  { id:"ecmo-co:DrainageRole", label:"DrainageRole", group:"role", status:"ready",
+    def:"A role that comes to inhere in a LumenConduit (or CannulaTip) at exactly the times at which the bearing material is, by current circuit configuration, designated to draw blood out of the patient's circulation.",
+    bfoLabel:"⊑ BFO:Role" },
+  { id:"ecmo-co:ReturnRole", label:"ReturnRole", group:"role", status:"ready",
+    def:"A role that comes to inhere in a LumenConduit (or CannulaTip) at exactly the times at which the bearing material is, by current circuit configuration, designated to return blood to the patient's circulation.",
+    bfoLabel:"⊑ BFO:Role" },
+  // ── ecmo-co: Process branch ──
+  { id:"ecmo-co:BloodFlowProcess", label:"BloodFlowProcess", group:"process", status:"ready",
+    def:"A process in which blood as a participant flows through a bounded spatial venue — most often a CannulaLumen, CircuitTubing interior channel, or CannulaFenestration.",
+    bfoLabel:"⊑ BFO:Process" },
+  { id:"ecmo-co:ECMORun", label:"ECMORun", group:"process", status:"ready",
+    def:"A process that is the totality of extracorporeal-support sub-processes (blood flow, gas exchange, anticoagulation, monitoring) delivered to a single patient via a single ECMO circuit assembly between cannulation and decannulation.",
+    bfoLabel:"⊑ BFO:Process" },
+  // ── ecmo-co: MaterialEntity branch (patient, anatomy, circuit blood) ──
+  { id:"ecmo-co:Patient", label:"Patient", group:"patient", status:"ready",
+    def:"A material entity that is a human being receiving extracorporeal life support and bearing the relevant patient role for the duration of one or more ECMO runs.",
+    bfoLabel:"⊑ BFO:MaterialEntity" },
+  { id:"ecmo-co:AnatomicalStructure", label:"AnatomicalStructure", group:"patient", status:"ready",
+    def:"A material anatomical entity of the patient's body that is a continuant_part_of the patient and that may serve as an access vessel, target chamber, or device-tissue interface bearer for an ECMO cannulation.",
+    bfoLabel:"⊑ BFO:MaterialEntity" },
+  { id:"ecmo-co:AccessVessel", label:"AccessVessel", group:"patient", status:"ready",
+    def:"An anatomical structure that is a vein used as the insertion-site vessel for one or more cannulae of an ECMO run.",
+    bfoLabel:"⊑ ecmo-co:AnatomicalStructure" },
+  { id:"ecmo-co:AccessArtery", label:"AccessArtery", group:"patient", status:"ready",
+    def:"An anatomical structure that is an artery used as the insertion-site vessel for one or more return cannulae of a V-A ECMO run.",
+    bfoLabel:"⊑ ecmo-co:AnatomicalStructure" },
+  { id:"ecmo-co:CentralCardiacStructure", label:"CentralCardiac", group:"patient", status:"ready",
+    def:"An anatomical structure of or adjacent to the heart that may serve as a target tip-position chamber for ECMO cannulation, or as the cannulation site itself in central V-A configurations.",
+    bfoLabel:"⊑ ecmo-co:AnatomicalStructure" },
+  { id:"ecmo-co:PortionOfCircuitBlood", label:"PortionOfCircuitBlood", group:"patient", status:"ready",
+    def:"A material entity that is the portion of blood occupying the extracorporeal circuit, or a named segment of it, at a given time, and that is the bearer of the fluid qualities — pressure, temperature, oxygen saturation, haemoglobin concentration — that extracorporeal measurements report.",
+    bfoLabel:"⊑ BFO:MaterialEntity" },
+];
+
+const links = [
+  // ECMO-CO → BFO
+  { source:"ecmo-co:ECMOCircuit",             target:"bfo:ObjectAggregate" },
+  { source:"ecmo-co:CircuitSegment",          target:"bfo:ObjectAggregate" },
+  { source:"ecmo-co:PatientCircuitAssembly",  target:"bfo:ObjectAggregate" },
+  { source:"ecmo-co:CircuitComponent",        target:"bfo:Object" },
+  { source:"ecmo-co:LumenConduit",            target:"bfo:FiatObjectPart" },
+  { source:"ecmo-co:CannulaTip",              target:"bfo:FiatObjectPart" },
+  { source:"ecmo-co:FenestrationRim",         target:"bfo:FiatObjectPart" },
+  { source:"ecmo-co:CannulaLumen",            target:"bfo:Site" },
+  { source:"ecmo-co:CannulaFenestration",     target:"bfo:Site" },
+  { source:"ecmo-co:AnatomicalSpace",         target:"bfo:Site" },
+  { source:"ecmo-co:CannulationConfiguration", target:"bfo:GDC" },
+  { source:"ecmo-co:CircuitConnection",       target:"bfo:GDC" },
+  { source:"ecmo-co:ConfigurationMode",       target:"bfo:GDC" },
+  { source:"ecmo-co:PhysicalInterface",       target:"bfo:RelationalQuality" },
+  { source:"ecmo-co:DrainageFunction",        target:"bfo:Function" },
+  { source:"ecmo-co:ReturnFunction",          target:"bfo:Function" },
+  { source:"ecmo-co:DrainageRole",            target:"bfo:Role" },
+  { source:"ecmo-co:ReturnRole",              target:"bfo:Role" },
+  { source:"ecmo-co:BloodFlowProcess",        target:"bfo:Process" },
+  { source:"ecmo-co:ECMORun",                 target:"bfo:Process" },
+  { source:"ecmo-co:Patient",                 target:"bfo:MaterialEntity" },
+  { source:"ecmo-co:AnatomicalStructure",     target:"bfo:MaterialEntity" },
+  { source:"ecmo-co:PortionOfCircuitBlood",   target:"bfo:MaterialEntity" },
+  { source:"ecmo-co:CircuitBloodPressure",    target:"bfo:Quality" },
+  // ECMO-CO → ECMO-CO
+  { source:"ecmo-co:Cannula",                target:"ecmo-co:CircuitComponent" },
+  { source:"ecmo-co:BloodPump",              target:"ecmo-co:CircuitComponent" },
+  { source:"ecmo-co:Oxygenator",             target:"ecmo-co:CircuitComponent" },
+  { source:"ecmo-co:CircuitTubing",          target:"ecmo-co:CircuitComponent" },
+  { source:"ecmo-co:Port",                   target:"ecmo-co:CircuitComponent" },
+  { source:"ecmo-co:RecordedConnection",     target:"ecmo-co:CircuitConnection" },
+  { source:"ecmo-co:CircuitInterface",       target:"ecmo-co:PhysicalInterface" },
+  { source:"ecmo-co:DeviceTissueInterface",  target:"ecmo-co:PhysicalInterface" },
+  { source:"ecmo-co:SpatialContinuityInterface", target:"ecmo-co:PhysicalInterface" },
+  { source:"ecmo-co:AccessVessel",           target:"ecmo-co:AnatomicalStructure" },
+  { source:"ecmo-co:AccessArtery",           target:"ecmo-co:AnatomicalStructure" },
+  { source:"ecmo-co:CentralCardiacStructure", target:"ecmo-co:AnatomicalStructure" },
+];
+
+// ── Layout ────────────────────────────────────────────────────────────────
+
+const W = window.innerWidth;
+const H = window.innerHeight - 52;
+
+const svg = d3.select("#graph")
+  .attr("width", W)
+  .attr("height", H);
+
+const g = svg.append("g");
+
+svg.call(d3.zoom().scaleExtent([0.2, 3]).on("zoom", e => g.attr("transform", e.transform)));
+
+// arrow marker inside g so zoom doesn't affect it separately
+svg.append("defs").append("marker")
+  .attr("id", "arrow2")
+  .attr("markerWidth", 8).attr("markerHeight", 8)
+  .attr("refX", 16).attr("refY", 3)
+  .attr("orient", "auto")
+  .append("path")
+    .attr("d", "M0,0 L0,6 L8,3 z")
+    .attr("fill", "rgba(255,255,255,0.25)");
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d => d.id).distance(d => {
+    const isBFO = d.target.id && d.target.id.startsWith("bfo:");
+    return isBFO ? 90 : 65;
+  }).strength(0.6))
+  .force("charge", d3.forceManyBody().strength(-280))
+  .force("center", d3.forceCenter(W / 2, H / 2))
+  .force("collision", d3.forceCollide(22));
+
+const link = g.append("g").selectAll("line")
+  .data(links).enter().append("line")
+    .attr("class", "link subclassof")
+    .attr("marker-end", "url(#arrow2)");
+
+const node = g.append("g").selectAll("g")
+  .data(nodes).enter().append("g")
+    .attr("class", d => "node" + (d.group === "bfo" ? " bfo" : ""))
+    .call(d3.drag()
+      .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on("end",   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }))
+    .on("click", (e, d) => { e.stopPropagation(); showPanel(d); });
+
+node.append("circle")
+  .attr("r", d => d.group === "bfo" ? RADIUS.bfo : RADIUS.eco)
+  .attr("fill", d => COLOR[d.group] || "#607D8B")
+  .attr("class", d => d.status === "pending" ? "pending" : "ready");
+
+node.append("text")
+  .attr("dy", d => (d.group === "bfo" ? RADIUS.bfo : RADIUS.eco) + 12)
+  .text(d => d.label);
+
+svg.on("click", () => closePanel());
+
+sim.on("tick", () => {
+  link
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+  node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// ── Panel ────────────────────────────────────────────────────────────────
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+function showPanel(d) {
+  const isBFO = d.group === "bfo";
+  const statusHtml = d.status
+    ? `<span class="status-badge status-${d.status}">curation: ${d.status}</span>`
+    : `<span class="status-badge" style="background:#263238;color:#607D8B">BFO anchor</span>`;
+
+  document.getElementById("panel-content").innerHTML = `
+    <div class="class-id">${d.id}</div>
+    <div class="class-label">${d.label}</div>
+    <div class="bfo-parent">${d.bfoLabel || ""}</div>
+    ${statusHtml}
+    <hr style="border-color:#263238; margin: 0.8rem 0">
+    <div class="def">${esc(d.def)}</div>
+  `;
+  document.getElementById("info-panel").classList.add("open");
+}
+
+function closePanel() {
+  document.getElementById("info-panel").classList.remove("open");
+}
+
+function resetZoom() {
+  svg.transition().duration(500)
+    .call(d3.zoom().transform, d3.zoomIdentity.translate(W/2, H/2).scale(0.9).translate(-W/2, -H/2));
+}
+
+let bfoVisible = true;
+function toggleBFO() {
+  bfoVisible = !bfoVisible;
+  g.selectAll(".node.bfo").style("display", bfoVisible ? null : "none");
+  link.style("display", d => {
+    if (!bfoVisible && d.target.id && d.target.id.startsWith("bfo:")) return "none";
+    return null;
+  });
+}
+</script>
+</body>
+</html>
+

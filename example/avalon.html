@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — AVALON Dual-Lumen V-V</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8F9FA; }
+    .topbar { background: #0D1B2A; color: #E3F2FD; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .topbar a { color: #90CAF9; text-decoration: none; font-size: 0.85rem; }
+    .topbar .title { font-weight: 700; font-size: 0.95rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; }
+    .mode-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.75rem; font-weight:700; background:#E3F2FD; color:#0D47A1; }
+    pre.rdf { background:#1A1A2E; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #263238; margin:0; }
+    .rdf .prefix { color:#90CAF9; } .rdf .uri { color:#80CBC4; } .rdf .eco { color:#81D4FA; } .rdf .lit { color:#A5D6A7; } .rdf .comment { color:#546E7A; font-style:italic; } .rdf .prop { color:#FFE082; }
+    pre.sparql { background:#0D1B2A; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #1E3A5F; margin:0; }
+    .sparql .kw { color:#CE93D8; font-weight:600; } .sparql .var { color:#80CBC4; } .sparql .uri { color:#81D4FA; } .sparql .cmt { color:#546E7A; font-style:italic; }
+    .query-result { background:#1B5E20; color:#C8E6C9; border-radius:6px; padding:0.6rem 1rem; font-size:0.82rem; font-family:monospace; margin-top:0.5rem; white-space:pre; overflow-x:auto; }
+    .eco-feature { background:#E3F2FD; border-left:4px solid #1565C0; padding:0.5rem 0.75rem; margin-bottom:0.5rem; font-size:0.85rem; border-radius:0 4px 4px 0; }
+    code { background:#F3F4F6; padding:2px 5px; border-radius:3px; font-size:0.85em; color:#1565C0; }
+  </style>
+</head>
+<body>
+<div data-ecmoco-banner class="text-center small py-1" style="background:#FFF3CD; color:#664D03;">Research prototype (pilot) · synthetic example · not clinical guidance</div>
+<div class="topbar">
+  <a href="../index.html">← ECMO-CO Home</a>
+  <span style="color:#37474F">|</span>
+  <a href="index.html">← Examples</a>
+  <span class="title">AVALON Dual-Lumen V-V (single-site IJ)</span>
+  <span class="mode-badge">V-V</span>
+</div>
+
+<div class="container my-4">
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="section-label mb-2">Clinical Scenario</div>
+          <h4 class="mb-3">V-V ECMO — AVALON Elite Dual-Lumen, Single Right IJ Cannulation</h4>
+          <p>Adult patient with severe ARDS requiring V-V ECMO. A single AVALON Elite 27 Fr dual-lumen cannula is placed via the right internal jugular vein. The distal tip resides in the IVC; the mid-cannula return opening directs oxygenated blood toward the tricuspid valve.</p>
+          <ul class="small">
+            <li><strong>Drainage:</strong> two fenestrations — distal in IVC + proximal in SVC — via the <em>outer</em> drainage lumen</li>
+            <li><strong>Return:</strong> one mid-cannula fenestration in right atrium, jet directed at tricuspid valve — via the <em>inner</em> return lumen</li>
+            <li>Single-site access: only one venous puncture site (right IJ)</li>
+            <li>Centrifugal pump + PMP hollow-fibre oxygenator</li>
+          </ul>
+          <hr class="my-3">
+          <div class="section-label mb-2">Key ECMO-CO Features in This Scenario</div>
+          <div class="eco-feature"><strong>Two LumenConduits in one Cannula</strong> — the AVALON cannula hosts two coaxial <code>LumenConduit</code> (FiatObjectPart) individuals, each bearing its own Function and Role; ECMO-CO encodes this via <code>bfo:0000176</code> (part-of) to the same Cannula individual</div>
+          <div class="eco-feature"><strong>3 CannulaFenestrations</strong> — two drainage openings (IVC + SVC) bound to the drainage <code>LumenConduit</code>; one return opening (RA) bound to the return <code>LumenConduit</code>; each asserts <code>ecmo-co:opensInto</code> its CannulaLumen</div>
+          <div class="eco-feature"><strong>ecmo-co:opensInto property</strong> — links each <code>CannulaFenestration</code> (BFO Site) to the <code>CannulaLumen</code> (BFO Site) it communicates with; the fenestration itself is part of (<code>bfo:0000176</code>) the <code>LumenConduit</code>, so the immaterial channel and the material wall stay distinct</div>
+          <div class="eco-feature"><strong>Both DrainageRole and ReturnRole on one physical cannula</strong> — the ELSO Registry records a dual-lumen cannula as one cannula entry with Initial Purpose "Both drainage and return" and has no per-lumen or fenestration fields. ECMO-CO places each role on a distinct lumen-conduit part of the same cannula individual</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">Circuit Diagram &amp; Instance Network</div>
+          <svg viewBox="0 0 600 360" width="100%" style="background:#1A1A2E; border-radius:8px; border:1px solid #263238;">
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#90CAF9"/>
+              </marker>
+              <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#A5D6A7"/>
+              </marker>
+              <marker id="arro" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#FFE082"/>
+              </marker>
+            </defs>
+
+            <!-- Title -->
+            <text x="300" y="16" text-anchor="middle" font-size="9" fill="#546E7A">CIRCUIT FLOW (schematic)</text>
+
+            <!-- PATIENT block -->
+            <rect x="10" y="26" width="68" height="50" rx="5" fill="#C62828"/>
+            <text x="44" y="45" text-anchor="middle" font-size="9" fill="white" font-weight="bold">PATIENT</text>
+            <text x="44" y="57" text-anchor="middle" font-size="7.5" fill="#FFCDD2">Right IJ</text>
+            <text x="44" y="68" text-anchor="middle" font-size="7" fill="#FFCDD2">single site</text>
+
+            <!-- AVALON cannula block (tall — shows two lumens) -->
+            <rect x="95" y="22" width="80" height="58" rx="5" fill="#1565C0"/>
+            <text x="135" y="38" text-anchor="middle" font-size="8" fill="white" font-weight="bold">AVALON 27Fr</text>
+            <rect x="102" y="43" width="34" height="14" rx="3" fill="#0D47A1"/>
+            <text x="119" y="53" text-anchor="middle" font-size="7" fill="#81D4FA">Drain lumen</text>
+            <rect x="140" y="43" width="28" height="14" rx="3" fill="#1976D2"/>
+            <text x="154" y="53" text-anchor="middle" font-size="7" fill="#80CBC4">Ret lumen</text>
+            <text x="135" y="72" text-anchor="middle" font-size="7" fill="#BBDEFB">IVC + SVC → RA jet</text>
+
+            <!-- Tubing drain -->
+            <rect x="190" y="32" width="55" height="22" rx="4" fill="#37474F"/>
+            <text x="218" y="46" text-anchor="middle" font-size="8" fill="#B0BEC5">Drain tubing</text>
+
+            <!-- Pump -->
+            <rect x="258" y="26" width="55" height="34" rx="5" fill="#4CAF50"/>
+            <text x="286" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="bold">PUMP</text>
+            <text x="286" y="52" text-anchor="middle" font-size="7" fill="#C8E6C9">centrifugal</text>
+
+            <!-- Tubing post-pump -->
+            <rect x="326" y="32" width="55" height="22" rx="4" fill="#37474F"/>
+            <text x="354" y="46" text-anchor="middle" font-size="8" fill="#B0BEC5">Tubing</text>
+
+            <!-- Oxygenator -->
+            <rect x="394" y="22" width="60" height="42" rx="5" fill="#7B1FA2"/>
+            <text x="424" y="38" text-anchor="middle" font-size="8" fill="white" font-weight="bold">OXY</text>
+            <text x="424" y="50" text-anchor="middle" font-size="7" fill="#E1BEE7">PMP hollow</text>
+            <text x="424" y="60" text-anchor="middle" font-size="7" fill="#E1BEE7">fibre</text>
+
+            <!-- Return tubing -->
+            <rect x="468" y="32" width="55" height="22" rx="4" fill="#37474F"/>
+            <text x="496" y="46" text-anchor="middle" font-size="8" fill="#B0BEC5">Ret tubing</text>
+
+            <!-- Back to patient return -->
+            <rect x="536" y="26" width="56" height="34" rx="5" fill="#C62828"/>
+            <text x="564" y="40" text-anchor="middle" font-size="8" fill="white">PATIENT</text>
+            <text x="564" y="52" text-anchor="middle" font-size="7" fill="#FFCDD2">RA return</text>
+            <text x="564" y="62" text-anchor="middle" font-size="7" fill="#FFCDD2">jet→TV</text>
+
+            <!-- Arrows drainage path -->
+            <line x1="78" y1="51" x2="95" y2="51" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="175" y1="43" x2="190" y2="43" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="245" y1="43" x2="258" y2="43" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="313" y1="43" x2="326" y2="43" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="381" y1="43" x2="394" y2="43" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="454" y1="43" x2="468" y2="43" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="523" y1="43" x2="536" y2="43" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+
+            <!-- Legend -->
+            <text x="10" y="94" font-size="8" fill="#90CAF9">— deoxygenated</text>
+            <text x="110" y="94" font-size="8" fill="#A5D6A7">— post-pump</text>
+            <text x="195" y="94" font-size="8" fill="#FFE082">— oxygenated return</text>
+
+            <!-- Instance network divider -->
+            <line x1="10" y1="104" x2="590" y2="104" stroke="#263238" stroke-width="1"/>
+            <text x="300" y="116" text-anchor="middle" font-size="9" fill="#546E7A">ECMO-CO INSTANCE NETWORK (schematic of the scenario's individuals)</text>
+
+            <!-- Cannula node -->
+            <ellipse cx="200" cy="160" rx="60" ry="20" fill="#1565C0" opacity="0.9"/>
+            <text x="200" y="157" text-anchor="middle" font-size="8" fill="white">Cannula_AVALON_27Fr</text>
+            <text x="200" y="168" text-anchor="middle" font-size="7" fill="#BBDEFB">ecmo-co:Cannula</text>
+
+            <!-- LumenConduit drainage -->
+            <ellipse cx="90" cy="230" rx="58" ry="18" fill="#42A5F5" opacity="0.9"/>
+            <text x="90" y="227" text-anchor="middle" font-size="7.5" fill="white">LC_AVALON_Drainage</text>
+            <text x="90" y="238" text-anchor="middle" font-size="7" fill="#E3F2FD">FiatObjectPart</text>
+
+            <!-- LumenConduit return -->
+            <ellipse cx="315" cy="230" rx="58" ry="18" fill="#42A5F5" opacity="0.9"/>
+            <text x="315" y="227" text-anchor="middle" font-size="7.5" fill="white">LC_AVALON_Return</text>
+            <text x="315" y="238" text-anchor="middle" font-size="7" fill="#E3F2FD">FiatObjectPart</text>
+
+            <!-- Fenestration IVC -->
+            <rect x="10" y="285" width="70" height="28" rx="4" fill="#00BCD4" opacity="0.85"/>
+            <text x="45" y="298" text-anchor="middle" font-size="7.5" fill="white">Fenestration</text>
+            <text x="45" y="308" text-anchor="middle" font-size="7" fill="#E0F7FA">IVC (distal)</text>
+
+            <!-- Fenestration SVC -->
+            <rect x="90" y="285" width="70" height="28" rx="4" fill="#00BCD4" opacity="0.85"/>
+            <text x="125" y="298" text-anchor="middle" font-size="7.5" fill="white">Fenestration</text>
+            <text x="125" y="308" text-anchor="middle" font-size="7" fill="#E0F7FA">SVC (proximal)</text>
+
+            <!-- Fenestration RA -->
+            <rect x="280" y="285" width="70" height="28" rx="4" fill="#00BCD4" opacity="0.85"/>
+            <text x="315" y="298" text-anchor="middle" font-size="7.5" fill="white">Fenestration</text>
+            <text x="315" y="308" text-anchor="middle" font-size="7" fill="#E0F7FA">RA → tricuspid</text>
+
+            <!-- DrainageRole -->
+            <rect x="440" y="200" width="75" height="24" rx="4" fill="#26A69A" opacity="0.85"/>
+            <text x="477" y="215" text-anchor="middle" font-size="7.5" fill="white">DrainageRole</text>
+
+            <!-- ReturnRole -->
+            <rect x="440" y="240" width="75" height="24" rx="4" fill="#26A69A" opacity="0.85"/>
+            <text x="477" y="255" text-anchor="middle" font-size="7.5" fill="white">ReturnRole</text>
+
+            <!-- part-of lines from LumenConduits to Cannula -->
+            <line x1="130" y1="218" x2="175" y2="173" stroke="#BBDEFB" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+            <text x="140" y="205" font-size="7" fill="#BBDEFB">part-of</text>
+            <line x1="280" y1="218" x2="220" y2="173" stroke="#BBDEFB" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+            <!-- Fenestrations part-of LumenConduits (bfo:0000176) -->
+            <line x1="45" y1="285" x2="72" y2="248" stroke="#80CBC4" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="125" y1="285" x2="105" y2="248" stroke="#80CBC4" stroke-width="1" marker-end="url(#arr)"/>
+            <text x="58" y="272" font-size="6.5" fill="#80CBC4">part-of</text>
+            <line x1="315" y1="285" x2="315" y2="248" stroke="#80CBC4" stroke-width="1" marker-end="url(#arr)"/>
+            <text x="318" y="272" font-size="6.5" fill="#80CBC4">part-of</text>
+
+            <!-- Roles -->
+            <line x1="148" y1="230" x2="440" y2="212" stroke="#26A69A" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+            <line x1="373" y1="230" x2="440" y2="252" stroke="#26A69A" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+            <text x="300" y="196" font-size="6.5" fill="#26A69A">ecmo-co:bears</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELSO comparison -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="section-label mb-3">ELSO Registry vs ECMO-CO Representational Comparison</div>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="table-dark">
+                <tr><th style="width:24%">Concept</th><th>ELSO Registry (2026 form and data definitions)</th><th>ECMO-CO (this scenario)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mode</td><td>ECLS mode V-V</td><td><code>ecmo-co:VV-mode</code> asserted on the <code>CannulationConfiguration</code> via <code>ecmo-co:hasModeAssertion</code></td></tr>
+                <tr><td>Drainage and return on one cannula</td><td>One cannula entry; Initial Purpose "Both drainage and return"</td><td>One <code>ecmo-co:Cannula</code> with <strong>two</strong> <code>ecmo-co:LumenConduit</code> parts (<code>bfo:0000176</code>); one bears a <code>DrainageFunction</code> and a <code>DrainageRole</code>, the other a <code>ReturnFunction</code> and a <code>ReturnRole</code></td></tr>
+                <tr><td>Lumens and fenestrations</td><td>Not captured: no per-lumen or fenestration fields</td><td>Three <code>ecmo-co:CannulaFenestration</code> Sites, two part of the drainage <code>LumenConduit</code> and one part of the return <code>LumenConduit</code>, each <code>ecmo-co:opensInto</code> that lumen's <code>CannulaLumen</code></td></tr>
+                <tr><td>Cannula site</td><td>Site code per cannula (e.g. RIJV, right internal jugular vein)</td><td>Not asserted in this scenario: the right-IJ insertion and the IVC, SVC and RA positions appear only in labels</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-muted mt-2 mb-0">ELSO column: ELSO ECLS Registry Form v12.0 (01/12/2026) and ELSO Registry Data Definitions (04/15/2026), cannulation site and Initial Purpose fields.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RDF -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">ECMO-CO ABox — Formal Encoding (Turtle/RDF)</div>
+          <pre class="rdf" data-ecmoco-illustrative><span class="comment"># Scenario (synthetic) — AVALON dual-lumen single-cannula V-V. Excerpt.</span>
+<span class="comment"># Namespace declarations omitted.</span>
+
+<span class="comment"># ── One physical cannula, two coaxial LumenConduit parts ──</span>
+<span class="eco">:Cannula_AVALON_27Fr</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Cannula</span> ;
+    <span class="prop">rdfs:label</span> <span class="lit">"AVALON Elite dual-lumen cannula, 27 Fr"@en</span> .
+
+<span class="eco">:LumenConduit_AVALON_Drainage</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:LumenConduit</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"AVALON drainage lumen conduit (outer)"@en</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:Cannula_AVALON_27Fr</span> ;
+    <span class="prop">ecmo-co:bears</span>   <span class="eco">:DrainageFunction_AVALON</span> ,
+                <span class="eco">:DrainageRole_AVALON_Epoch1</span> .
+
+<span class="eco">:LumenConduit_AVALON_Return</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:LumenConduit</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"AVALON return lumen conduit (inner)"@en</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:Cannula_AVALON_27Fr</span> ;
+    <span class="prop">ecmo-co:bears</span>   <span class="eco">:ReturnFunction_AVALON</span> ,
+                <span class="eco">:ReturnRole_AVALON_Epoch1</span> .
+
+<span class="comment"># ── CannulaLumen Sites (immaterial interior channels) ──</span>
+<span class="eco">:CannulaLumen_AVALON_Drainage</span>  <span class="prop">rdf:type</span> <span class="eco">ecmo-co:CannulaLumen</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:LumenConduit_AVALON_Drainage</span> .
+
+<span class="eco">:CannulaLumen_AVALON_Return</span>  <span class="prop">rdf:type</span> <span class="eco">ecmo-co:CannulaLumen</span> ;
+    <span class="prop">bfo:0000176</span> <span class="eco">:LumenConduit_AVALON_Return</span> .
+
+<span class="comment"># ── Three CannulaFenestrations — two drainage, one return ──</span>
+<span class="eco">:CannulaFenestration_AV_IVC</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulaFenestration</span> ;
+    <span class="prop">rdfs:label</span>   <span class="lit">"Distal drainage fenestration in IVC"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:LumenConduit_AVALON_Drainage</span> ;
+    <span class="prop">ecmo-co:opensInto</span> <span class="eco">:CannulaLumen_AVALON_Drainage</span> .
+
+<span class="eco">:CannulaFenestration_AV_SVC</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulaFenestration</span> ;
+    <span class="prop">rdfs:label</span>   <span class="lit">"Proximal drainage fenestration in SVC"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:LumenConduit_AVALON_Drainage</span> ;
+    <span class="prop">ecmo-co:opensInto</span> <span class="eco">:CannulaLumen_AVALON_Drainage</span> .
+
+<span class="eco">:CannulaFenestration_AV_RA</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulaFenestration</span> ;
+    <span class="prop">rdfs:label</span>   <span class="lit">"Mid-cannula return fenestration in right atrium (jets to tricuspid)"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:LumenConduit_AVALON_Return</span> ;
+    <span class="prop">ecmo-co:opensInto</span> <span class="eco">:CannulaLumen_AVALON_Return</span> .
+
+<span class="comment"># ── BloodFlowProcesses: dual-site drainage, targeted return ──</span>
+<span class="eco">:BloodFlow_AV_drainage</span>  <span class="prop">rdf:type</span> <span class="eco">ecmo-co:BloodFlowProcess</span> ;
+    <span class="prop">bfo:0000066</span>  <span class="eco">:CannulaLumen_AVALON_Drainage</span> ,
+                 <span class="eco">:CannulaFenestration_AV_IVC</span> ,
+                 <span class="eco">:CannulaFenestration_AV_SVC</span> .
+
+<span class="eco">:BloodFlow_AV_return</span>  <span class="prop">rdf:type</span> <span class="eco">ecmo-co:BloodFlowProcess</span> ;
+    <span class="prop">bfo:0000066</span>  <span class="eco">:CannulaLumen_AVALON_Return</span> ,
+                 <span class="eco">:CannulaFenestration_AV_RA</span> .
+
+<span class="comment"># ── CannulationConfiguration (mode + configuration epoch record) ──</span>
+<span class="eco">:CannulationConfig_AV01_Epoch1</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulationConfiguration</span> ;
+    <span class="prop">ecmo-co:hasModeAssertion</span>  <span class="eco">ecmo-co:VV-mode</span> ;
+    <span class="prop">ecmo-co:startedAt</span>  <span class="lit">"2026-05-11T10:15:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:isAbout</span>  <span class="eco">:Patient_AV01</span> , <span class="eco">:Cannula_AVALON_27Fr</span> ,
+                 <span class="eco">:LumenConduit_AVALON_Drainage</span> , <span class="eco">:LumenConduit_AVALON_Return</span> .
+</pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">SPARQL Competency Queries</div>
+
+          <p class="small text-muted mb-2"><strong>Q1 — List all fenestrations and the lumen each opens into</strong></p>
+          <pre class="sparql"><span class="cmt"># Namespace declarations omitted.</span>
+<span class="kw">SELECT</span> <span class="var">?fen</span> <span class="var">?label</span> <span class="var">?lumen</span>
+<span class="kw">WHERE</span> {
+  <span class="var">?fen</span>  <span class="uri">rdf:type</span>       <span class="uri">ecmo-co:CannulaFenestration</span> ;
+        <span class="uri">rdfs:label</span>     <span class="var">?label</span> ;
+        <span class="uri">ecmo-co:opensInto</span>  <span class="var">?lumen</span> .
+}
+<span class="kw">ORDER BY</span> <span class="var">?fen</span></pre>
+          <div class="query-result">?fen                        | ?label                                                                | ?lumen
+----------------------------|-----------------------------------------------------------------------|------------------------------
+:CannulaFenestration_AV_IVC | "Distal drainage fenestration in IVC"                                 | :CannulaLumen_AVALON_Drainage
+:CannulaFenestration_AV_RA  | "Mid-cannula return fenestration in right atrium (jets to tricuspid)" | :CannulaLumen_AVALON_Return
+:CannulaFenestration_AV_SVC | "Proximal drainage fenestration in SVC"                               | :CannulaLumen_AVALON_Drainage</div>
+
+          <p class="small text-muted mt-3 mb-2"><strong>Q2 — Verify both DrainageRole and ReturnRole exist on one cannula's parts</strong></p>
+          <pre class="sparql"><span class="cmt"># Namespace declarations omitted.</span>
+<span class="kw">ASK</span> {
+  <span class="var">?cannula</span>  <span class="uri">rdf:type</span>    <span class="uri">ecmo-co:Cannula</span> .
+  <span class="var">?lc1</span>      <span class="uri">rdf:type</span>    <span class="uri">ecmo-co:LumenConduit</span> ;
+            <span class="uri">bfo:0000176</span> <span class="var">?cannula</span> ;
+            <span class="uri">ecmo-co:bears</span>   <span class="var">?dr</span> .
+  <span class="var">?dr</span>       <span class="uri">rdf:type</span>    <span class="uri">ecmo-co:DrainageRole</span> .
+  <span class="var">?lc2</span>      <span class="uri">rdf:type</span>    <span class="uri">ecmo-co:LumenConduit</span> ;
+            <span class="uri">bfo:0000176</span> <span class="var">?cannula</span> ;
+            <span class="uri">ecmo-co:bears</span>   <span class="var">?rr</span> .
+  <span class="var">?rr</span>       <span class="uri">rdf:type</span>    <span class="uri">ecmo-co:ReturnRole</span> .
+  <span class="kw">FILTER</span>(<span class="var">?lc1</span> != <span class="var">?lc2</span>)
+}</pre>
+          <div class="query-result">true</div>
+          <p class="small text-muted mt-2 mb-0">The AVALON cannula has a DrainageRole and a ReturnRole, each borne by a different lumen-conduit part.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav footer -->
+  <div class="d-flex justify-content-between mt-2">
+    <a href="index.html" class="btn btn-outline-secondary btn-sm">← All Examples</a>
+    <a href="va-peripheral.html" class="btn btn-outline-primary btn-sm">Next: V-A Peripheral →</a>
+  </div>
+
+  <div data-ecmoco-disclaimer class="small text-muted border-top pt-3 mt-4">
+    Research prototype; not clinical guidance. The scenario on this page is synthetic: an invented case, not derived from any patient record. The RDF block is an excerpt of the scenario file; each query result shown is what the query returns over that scenario plus the ECMO-CO v0.1 ontology. Not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+
+</div>
+
+<footer class="small text-muted text-center py-3"><span>ECMO-CO project, Stony Brook University</span> · <span>Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

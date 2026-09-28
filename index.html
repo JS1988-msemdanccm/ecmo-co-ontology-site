@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — ECMO Circuit Ontology</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #FAFAFA; }
+    .ecmoco-banner { background: #FFF8E1; color: #5D4037; font-size: 0.8rem; text-align: center; padding: 0.35rem 1rem; border-bottom: 1px solid #FFE082; }
+    .ecmoco-disclaimer { font-size: 0.8rem; }
+    .hero { background: linear-gradient(135deg, #0D47A1 0%, #1565C0 60%, #1976D2 100%); color: white; padding: 5rem 0 4rem; }
+    .hero code { background: rgba(255,255,255,0.15); color: #E3F2FD; padding: 2px 6px; border-radius: 3px; }
+    .stat-box { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 1rem; text-align: center; }
+    .stat-box .h2 { font-size: 2rem; }
+    .nav-card { transition: transform 0.18s, box-shadow 0.18s; text-decoration: none; color: inherit; display: block; }
+    .nav-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.12); color: inherit; }
+    .stack-phase-1 { background: #E3F2FD; color: #0D47A1; font-weight: 600; }
+    .stack-phase-2 { background: #F5F5F5; color: #757575; }
+    .stack-divider td { background: #ECEFF1; font-weight: 700; letter-spacing: 0.04em; color: #455A64; font-size: 0.82rem; text-transform: uppercase; }
+    .stack-divider.proposed td { background: #F5F5F5; color: #90A4AE; }
+    tr.row-proposed td { color: #9E9E9E; background: #FAFAFA; font-style: italic; }
+    tr.row-proposed strong { color: #9E9E9E; font-weight: 600; }
+    .badge-adopted { background: #E8F5E9; color: #2E7D32; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-style: normal; font-weight: 600; }
+    .badge-proposed { background: #ECEFF1; color: #78909C; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-style: normal; font-weight: 600; }
+    code { background: #F3F4F6; padding: 2px 6px; border-radius: 3px; font-size: 0.875em; color: #1565C0; }
+    .badge-ready { background: #E8F5E9; color: #2E7D32; font-size: 0.75em; padding: 2px 7px; border-radius: 10px; }
+    .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; margin-bottom: 0.5rem; }
+    footer { background: #263238; color: #B0BEC5; }
+    footer a { color: #90CAF9; }
+  </style>
+</head>
+<body>
+
+<div data-ecmoco-banner class="ecmoco-banner">Research demonstrator (pilot) · Website v1 · ECMO-CO v0.1</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-7">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="badge bg-white text-primary">Phase 1</span>
+          <span class="badge bg-white text-secondary">v0.1</span>
+        </div>
+        <h1 class="display-3 fw-bold mb-2">ECMO-CO</h1>
+        <h2 class="h3 fw-normal mb-4" style="opacity:0.85">ECMO Circuit Ontology</h2>
+        <p class="lead mb-2">An OWL domain ontology under <strong>BFO 2020</strong> for the structure of an ECMO circuit: its components and ports, the directed connections between ports, and the lumens inside a cannula. It represents two things the ECLS Common Data Model does not capture — port-level directed connectivity and per-lumen cannula structure.</p>
+        <p class="mb-4" style="opacity:0.8">ECMO-CO project, Stony Brook University.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="graph/index.html" class="btn btn-light btn-lg px-4">Explore Ontology Graph →</a>
+          <a href="example/index.html" class="btn btn-outline-light btn-lg px-4">Clinical Worked Examples →</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3">
+          <div class="col-6"><div class="stat-box"><div class="h2 fw-bold mb-0">36</div><div class="small" style="opacity:0.75">Classes across the two ontology files</div></div></div>
+          <div class="col-6"><div class="stat-box"><div class="h2 fw-bold mb-0">17</div><div class="small" style="opacity:0.75">Synthetic ABox scenario files</div></div></div>
+          <div class="col-6"><div class="stat-box"><div class="h2 fw-bold mb-0">4</div><div class="small" style="opacity:0.75">Validation layers</div></div></div>
+          <div class="col-6"><div class="stat-box"><div class="h2 fw-bold mb-0">BFO</div><div class="small" style="opacity:0.75">Domain ontology under BFO 2020</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container my-5">
+
+  <!-- Motivation -->
+  <div class="row mb-5 g-4">
+    <div class="col-lg-6">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="section-label">The Problem</div>
+          <h3 class="h5 mb-3">What the ECLS Common Data Model does not capture</h3>
+          <p>The ECLS Common Data Model (an OMOP CDM extension; table definitions as retrieved May 2026) records an ECMO circuit's components as a membership list and each cannula as a single row. It does not capture:</p>
+          <ul class="mb-3">
+            <li><strong>Port-level directed adjacency</strong> — which component port feeds which, and the order of the components between the drainage and return cannulae. <code>ecls_circuit_component</code> lists circuit membership with no port, no order and no second component.</li>
+            <li><strong>Sub-cannula lumen structure</strong> — the drainage or return role and fenestrations of each lumen of a multi-lumen cannula. <code>ecls_cannula</code> holds one row with one flow direction per cannula; dual-lumen is a cannula device type, with no per-lumen record.</li>
+          </ul>
+          <p class="mb-0">The gap runs both ways: the ECLS CDM has dedicated columns for facts that ECMO-CO Phase 1 has no property for — run urgency as a concept code (<code>ecls_run.urgency_concept_id</code>), the cannula product's name and manufacturer as text (<code>ecls_cannula_material.name</code>, <code>manufacturer</code>) and cannula size as an integer French size (<code>ecls_cannula_material.diameter_in_french</code>) — which the ECMO-CO scenarios carry at most in free-text labels.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="section-label">The Solution</div>
+          <h3 class="h5 mb-3">A domain ontology under BFO 2020</h3>
+          <p>ECMO-CO is an OWL ontology that represents ECMO circuit structure as machine-readable data. Phase 1 scope:</p>
+          <ul class="mb-3">
+            <li>Static circuit topology: components, segments, ports, connections</li>
+            <li>Lumen mereology: <code>LumenConduit</code> (material) paired with <code>CannulaLumen</code> (site)</li>
+            <li>Role/function distinction on cannula lumens across temporal epochs</li>
+            <li>Configuration records as generically dependent continuants (GDC)</li>
+            <li>4-layer validation: OWL parse → OWL-RL closure → SHACL → SPARQL CQ probes</li>
+          </ul>
+          <p class="mb-0 mt-3 text-muted small">Phase 2 is planned to add sensor/observation (SOSA), provenance (PROV-O) and measurement units (QUDT); see the stack table below.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<section class="mb-5" id="example-port-connectivity">
+  <div class="section-label">Concrete example — how the circuit is connected</div>
+  <div class="card border-0 border-top border-3 border-danger shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h3 class="h6 mb-3"><span class="me-1">✗</span> What the ECLS CDM records — and does not capture</h3>
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <svg viewBox="0 0 320 300" role="img" aria-labelledby="u4p-prob-t u4p-prob-d" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;max-width:400px;height:auto;margin:0 auto;background:#FFFFFF;border:1px solid #CFD8DC;border-radius:6px" font-family="ui-monospace, Consolas, monospace">
+            <title id="u4p-prob-t">ECLS CDM circuit membership rows</title>
+            <desc id="u4p-prob-d">Four ecls_circuit_component rows for one circuit (two cannulae, one blood pump, one membrane lung), and the flow direction of each cannula. No column in these rows names a connected component, a port or the components' order.</desc>
+            <text x="8" y="20" font-size="13" font-weight="700" fill="#263238">ecls_circuit_component</text>
+            <rect x="8" y="30" width="304" height="24" fill="#ECEFF1"/>
+            <g font-size="12" font-weight="700" fill="#37474F">
+              <text x="12" y="46">circuit_id</text><text x="90" y="46">component_type</text><text x="224" y="46">component_id</text>
+            </g>
+            <g font-size="12" fill="#263238">
+              <text x="12" y="72">1</text><text x="90" y="72">ecls_cannula</text><text x="224" y="72">1</text>
+              <text x="12" y="96">1</text><text x="90" y="96">ecls_cannula</text><text x="224" y="96">2</text>
+              <text x="12" y="120">1</text><text x="90" y="120">ecls_blood_pump</text><text x="224" y="120">1</text>
+              <text x="12" y="144">1</text><text x="90" y="144">ecls_membrane_lung</text><text x="224" y="144">1</text>
+            </g>
+            <g stroke="#CFD8DC"><line x1="8" y1="78" x2="312" y2="78"/><line x1="8" y1="102" x2="312" y2="102"/><line x1="8" y1="126" x2="312" y2="126"/><line x1="8" y1="150" x2="312" y2="150"/></g>
+            <rect x="8" y="162" width="304" height="68" rx="4" fill="#F5F5F5" stroke="#CFD8DC"/>
+            <text x="16" y="182" font-size="12" font-weight="700" fill="#37474F">ecls_cannula.flow_direction_concept_id</text>
+            <text x="16" y="202" font-size="12" fill="#263238">cannula 1: Drainage</text>
+            <text x="16" y="220" font-size="12" fill="#263238">cannula 2: Return</text>
+            <rect x="8" y="240" width="304" height="54" rx="4" fill="#FFEBEE" stroke="#C62828"/>
+            <g font-size="12" font-weight="700" fill="#B71C1C" font-family="'Segoe UI', system-ui, sans-serif" text-anchor="middle">
+              <text x="160" y="257">✗ Not captured: which component feeds</text>
+              <text x="160" y="272">which, through which port, or the order</text>
+              <text x="160" y="287">of the components between the cannulae</text>
+            </g>
+          </svg>
+        </div>
+        <div class="col-lg-5">
+          <p class="small mb-2"><strong>Records:</strong> which components belong to each circuit (<code>ecls_circuit_component</code>) and each cannula's flow direction (<code>flow_direction_concept_id</code>). Its concept releases also include concepts for membrane lungs in series or in parallel, for measurements whose concept carries its own position (pre- and post-membrane lung pressure, pump inlet pressure, membrane lung pressure drop), and for where a renal replacement therapy circuit is attached relative to the membrane lung and blood pump.</p>
+          <p class="small mb-0"><strong>✗ Does not capture:</strong> which component feeds which, through which port, or the order of the components between the drainage and return cannulae. No ECLS CDM extension table or column links one component to another, and none of its concepts names such a link: the position-bearing concepts above place a measurement or an attachment point, and the series and parallel concepts do not say which membrane lung feeds which.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card border-0 border-top border-3 border-success shadow-sm">
+    <div class="card-body p-4">
+      <h3 class="h6 mb-3"><span class="me-1">✓</span> What ECMO-CO represents</h3>
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <svg viewBox="0 0 320 296" role="img" aria-labelledby="u4p-sol-t u4p-sol-d" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;max-width:400px;height:auto;margin:0 auto;background:#FFFFFF;border:1px solid #CFD8DC;border-radius:6px" font-family="'Segoe UI', system-ui, sans-serif">
+            <title id="u4p-sol-t">ECMO-CO port-level connections, VV femoral–IJ scenario</title>
+            <desc id="u4p-sol-d">Flow order: femoral cannula → drainage tubing → blood pump → oxygenator → return tubing → IJ cannula. Each dot is a port that is part of its component; each of the five arrows is one directed connection from a port on one component to a port on the next.</desc>
+            <defs><marker id="u4p-arrow" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#37474F"/></marker></defs>
+            <text x="8" y="22" font-size="13" font-weight="700" fill="#263238">flow order, connection by connection</text>
+            <g fill="#E3F2FD" stroke="#1565C0" stroke-width="1.2">
+              <rect x="8" y="40" width="80" height="48" rx="5"/><rect x="120" y="40" width="80" height="48" rx="5"/><rect x="232" y="40" width="80" height="48" rx="5"/>
+              <rect x="232" y="136" width="80" height="48" rx="5"/><rect x="120" y="136" width="80" height="48" rx="5"/><rect x="8" y="136" width="80" height="48" rx="5"/>
+            </g>
+            <g font-size="13" fill="#0D47A1" text-anchor="middle">
+              <text x="48" y="60">femoral</text><text x="48" y="76">cannula</text>
+              <text x="160" y="60">drainage</text><text x="160" y="76">tubing</text>
+              <text x="272" y="60">blood</text><text x="272" y="76">pump</text>
+              <text x="272" y="164">oxygenator</text>
+              <text x="160" y="156">return</text><text x="160" y="172">tubing</text>
+              <text x="48" y="156">IJ</text><text x="48" y="172">cannula</text>
+            </g>
+            <g fill="#1565C0" stroke="#FFFFFF" stroke-width="1.5">
+              <circle cx="88" cy="64" r="5"/>
+              <circle cx="120" cy="64" r="5"/><circle cx="200" cy="64" r="5"/>
+              <circle cx="232" cy="64" r="5"/><circle cx="272" cy="88" r="5"/>
+              <circle cx="272" cy="136" r="5"/><circle cx="232" cy="160" r="5"/>
+              <circle cx="200" cy="160" r="5"/><circle cx="120" cy="160" r="5"/>
+              <circle cx="88" cy="160" r="5"/>
+            </g>
+            <g stroke="#37474F" stroke-width="1.6" marker-end="url(#u4p-arrow)">
+              <line x1="94" y1="64" x2="114" y2="64"/><line x1="206" y1="64" x2="226" y2="64"/>
+              <line x1="272" y1="94" x2="272" y2="130" stroke-width="2.6"/>
+              <line x1="226" y1="160" x2="206" y2="160"/><line x1="114" y1="160" x2="94" y2="160"/>
+            </g>
+            <text x="262" y="116" font-size="12" text-anchor="end" fill="#37474F">excerpted below →</text>
+            <circle cx="14" cy="211" r="5" fill="#1565C0"/>
+            <text x="26" y="215" font-size="12.5" fill="#263238">ecmo-co:Port, part of its component</text>
+            <line x1="8" y1="235" x2="22" y2="235" stroke="#37474F" stroke-width="1.6" marker-end="url(#u4p-arrow)"/>
+            <text x="26" y="239" font-size="12.5" fill="#263238">ecmo-co:CircuitConnection:</text>
+            <text x="26" y="257" font-size="12.5" fill="#263238">hasUpstreamPort → hasDownstreamPort</text>
+            <text x="8" y="284" font-size="12.5" fill="#546E7A">✓ chaining the connections gives the order</text>
+          </svg>
+        </div>
+        <div class="col-lg-5">
+          <p class="small mb-0">Each junction is recorded by an <code>ecmo-co:CircuitConnection</code>: an information record of the directed mating of an upstream <code>ecmo-co:Port</code> to a downstream one. It points to the <code>ecmo-co:CircuitInterface</code>, the relational quality that both ports bear while they are mated. Each port is part of its component. Chaining the connections port to port gives the flow order: femoral cannula → drainage tubing → blood pump → oxygenator → return tubing → IJ cannula.</p>
+        </div>
+      </div>
+<pre class="small bg-light border rounded p-2 mt-3 mb-2" style="white-space:pre-wrap"><code>:CC_Pump-Oxygenator a ecmo-co:CircuitConnection ;
+    ecmo-co:hasUpstreamPort     :Port_Pump_outlet ;
+    ecmo-co:hasDownstreamPort   :Port_Oxy_inlet ;
+    ecmo-co:connectionInterface :PI_Pump-Oxygenator .
+:Port_Pump_outlet a ecmo-co:Port ; bfo:0000176 :Pump_Centrifugal_01 .
+:Port_Oxy_inlet   a ecmo-co:Port ; bfo:0000176 :Oxygenator_PMP_01 .
+:PI_Pump-Oxygenator a ecmo-co:CircuitInterface .</code></pre>
+          <p class="small text-muted mb-0">Excerpt from the synthetic VV femoral–IJ scenario; namespace declarations omitted. <code>bfo:0000176</code> is BFO's “continuant part of”. The order is derived by following the connections; no ordinal value is stored. Component names come from the scenario's text labels: the ECLS CDM records cannula site (coded) and size, which this scenario states only in text.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mb-5" id="example-lumen-structure">
+  <div class="section-label">Concrete example — inside a dual-lumen cannula</div>
+  <p class="small mb-3 ps-2 border-start border-3 border-warning"><strong>Note:</strong> the ECLS CDM's table definitions and concept releases support the per-lumen capture gap shown below; its clinical value has not yet been demonstrated.</p>
+  <div class="card border-0 border-top border-3 border-danger shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h3 class="h6 mb-3"><span class="me-1">✗</span> What the ECLS CDM records — and does not capture</h3>
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <svg viewBox="0 0 320 256" role="img" aria-labelledby="u4a-prob-t u4a-prob-d" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;max-width:400px;height:auto;margin:0 auto;background:#FFFFFF;border:1px solid #CFD8DC;border-radius:6px" font-family="ui-monospace, Consolas, monospace">
+            <title id="u4a-prob-t">ECLS CDM cannula row for a dual-lumen cannula</title>
+            <desc id="u4a-prob-d">An ecls_cannula row holds one flow direction, which may be Drainage and return, one coded site and one coded tip position. There is no lumen-level row, no per-lumen role and no fenestration.</desc>
+            <text x="8" y="20" font-size="13" font-weight="700" fill="#263238">ecls_cannula</text>
+            <text x="8" y="38" font-size="12.5" fill="#546E7A" font-family="'Segoe UI', system-ui, sans-serif">one row, here for a dual-lumen cannula</text>
+            <g fill="#ECEFF1"><rect x="8" y="48" width="304" height="24"/><rect x="8" y="96" width="304" height="24"/><rect x="8" y="144" width="304" height="24"/></g>
+            <rect x="8" y="48" width="304" height="144" fill="none" stroke="#CFD8DC"/>
+            <g font-size="12" fill="#37474F" font-weight="700">
+              <text x="14" y="65">flow_direction_concept_id</text><text x="14" y="113">location_concept_id</text><text x="14" y="161">tip_position_concept_id</text>
+            </g>
+            <g font-size="12.5" fill="#263238" font-family="'Segoe UI', system-ui, sans-serif">
+              <text x="14" y="89">one value, e.g. Drainage and return</text><text x="14" y="137">one coded site</text><text x="14" y="185">one coded tip position</text>
+            </g>
+            <rect x="8" y="202" width="304" height="46" rx="4" fill="#FFEBEE" stroke="#C62828"/>
+            <g font-size="12.5" font-weight="700" fill="#B71C1C" font-family="'Segoe UI', system-ui, sans-serif" text-anchor="middle">
+              <text x="160" y="221">✗ no lumen-level row</text>
+              <text x="160" y="239">no per-lumen role · no fenestration</text>
+            </g>
+          </svg>
+        </div>
+        <div class="col-lg-5">
+          <p class="small mb-2"><strong>Records:</strong> each cannula as an <code>ecls_cannula</code> row with one flow direction (which may be “drainage and return”), one coded site and one coded tip position. Its concept releases also include cannula-type concepts: single-lumen, dual-lumen, and single-lumen with an integrated distal perfusion outlet.</p>
+          <p class="small mb-0"><strong>✗ Does not capture:</strong> the parts inside a cannula — which lumen drains and which returns, and which fenestrations belong to which lumen. No ECLS CDM extension table has a lumen-level row, and no table, column or concept names a fenestration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card border-0 border-top border-3 border-success shadow-sm">
+    <div class="card-body p-4">
+      <h3 class="h6 mb-3"><span class="me-1">✓</span> What ECMO-CO represents</h3>
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <svg viewBox="0 0 320 270" role="img" aria-labelledby="u4a-sol-t u4a-sol-d" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;max-width:400px;height:auto;margin:0 auto;background:#FFFFFF;border:1px solid #CFD8DC;border-radius:6px" font-family="'Segoe UI', system-ui, sans-serif">
+            <title id="u4a-sol-t">ECMO-CO parts of one dual-lumen cannula, AVALON scenario</title>
+            <desc id="u4a-sol-d">One cannula with two lumen conduits. The drainage lumen conduit bears a drainage function and a drainage role; two fenestrations are part of it and open into its lumen. The return lumen conduit bears a return function and a return role; one fenestration is part of it and opens into its lumen. Schematic: the physical arrangement of the lumens is not depicted.</desc>
+            <text x="8" y="20" font-size="13" font-weight="700" fill="#263238">one ecmo-co:Cannula</text>
+            <text x="8" y="38" font-size="12.5" fill="#546E7A">schematic, not to scale</text>
+            <g font-size="12" fill="#37474F" text-anchor="middle">
+              <text x="90" y="58">fenestration</text><text x="230" y="58">fenestration</text>
+              <text x="160" y="214">fenestration</text>
+            </g>
+            <g stroke="#37474F"><line x1="90" y1="62" x2="90" y2="77"/><line x1="230" y1="62" x2="230" y2="77"/><line x1="160" y1="191" x2="160" y2="202"/></g>
+            <rect x="8" y="76" width="304" height="112" rx="10" fill="none" stroke="#1565C0" stroke-width="1.5"/>
+            <rect x="14" y="82" width="292" height="48" rx="4" fill="#E3F2FD"/>
+            <rect x="14" y="134" width="292" height="48" rx="4" fill="#E8EAF6"/>
+            <g text-anchor="middle">
+              <text x="160" y="101" font-size="13" font-weight="700" fill="#0D47A1">drainage lumen conduit</text>
+              <text x="160" y="120" font-size="12.5" fill="#0D47A1">bears DrainageFunction, DrainageRole</text>
+              <text x="160" y="153" font-size="13" font-weight="700" fill="#1A237E">return lumen conduit</text>
+              <text x="160" y="172" font-size="12.5" fill="#1A237E">bears ReturnFunction, ReturnRole</text>
+            </g>
+            <g fill="#FFFFFF" stroke="#263238" stroke-width="1.2">
+              <rect x="82" y="78" width="16" height="8" rx="2"/><rect x="222" y="78" width="16" height="8" rx="2"/>
+              <rect x="152" y="182" width="16" height="8" rx="2"/>
+            </g>
+            <text x="8" y="240" font-size="12.5" fill="#546E7A">✓ each fenestration is part of one lumen</text>
+            <text x="8" y="258" font-size="12.5" fill="#546E7A">conduit and opens into that conduit's lumen</text>
+          </svg>
+        </div>
+        <div class="col-lg-5">
+          <p class="small mb-0">The cannula has two <code>ecmo-co:LumenConduit</code> parts. One bears <code>ecmo-co:DrainageFunction</code> and <code>ecmo-co:DrainageRole</code>; the other bears <code>ecmo-co:ReturnFunction</code> and <code>ecmo-co:ReturnRole</code>. Each <code>ecmo-co:CannulaFenestration</code> is part of one lumen conduit and <code>ecmo-co:opensInto</code> that conduit's <code>ecmo-co:CannulaLumen</code>: two on the drainage conduit, one on the return conduit.</p>
+        </div>
+      </div>
+<pre class="small bg-light border rounded p-2 mt-3 mb-2" style="white-space:pre-wrap"><code>:LumenConduit_AVALON_Drainage a ecmo-co:LumenConduit ;
+    bfo:0000176   :Cannula_AVALON_27Fr ;
+    ecmo-co:bears :DrainageFunction_AVALON , :DrainageRole_AVALON_Epoch1 .
+:LumenConduit_AVALON_Return a ecmo-co:LumenConduit ;
+    bfo:0000176   :Cannula_AVALON_27Fr ;
+    ecmo-co:bears :ReturnFunction_AVALON , :ReturnRole_AVALON_Epoch1 .
+:CannulaFenestration_AV_RA a ecmo-co:CannulaFenestration ;
+    bfo:0000176       :LumenConduit_AVALON_Return ;
+    ecmo-co:opensInto :CannulaLumen_AVALON_Return .</code></pre>
+          <p class="small text-muted mb-0">Excerpt from the synthetic AVALON dual-lumen scenario; namespace declarations omitted. <code>bfo:0000176</code> is BFO's “continuant part of”. Fenestration placement appears only in the scenario's text labels and identifiers; the ECLS CDM codes cannula site and tip position.</p>
+    </div>
+  </div>
+</section>
+
+  <!-- Nav cards -->
+  <div class="section-label mb-3">Explore ECMO-CO</div>
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <a href="graph/index.html" class="nav-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="fs-2 mb-3">🕸️</div>
+            <h5 class="card-title">Ontology Graph</h5>
+            <p class="card-text text-muted mb-0">Interactive force-directed visualization of the ECMO-CO class hierarchy, color-coded by BFO branch. Click any class to view its definition, BFO parent, and curation status.</p>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View graph →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="example/index.html" class="nav-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="fs-2 mb-3">🏥</div>
+            <h5 class="card-title">Clinical Worked Examples</h5>
+            <p class="card-text text-muted mb-0">Five annotated synthetic ABox scenarios: VV femoral-IJ, AVALON dual-lumen, VA peripheral, central VA post-cardiotomy, and parallel oxygenators. Each shows an excerpt of the scenario's RDF encoding with a circuit diagram.</p>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View examples →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="classes.html" class="nav-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="fs-2 mb-3">📋</div>
+            <h5 class="card-title">Class &amp; Property Reference</h5>
+            <p class="card-text text-muted mb-0">Structured tables of every Phase 1 class, object/datatype property, and mode classifier, each class mapped to its <strong>BFO 2020</strong> parent. FMA is a SKOS annotation mapping, not an import. Phase 2 layers are marked as proposed.</p>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View reference →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="fs-2 mb-3">📂</div>
+          <h5 class="card-title">Ontology files</h5>
+          <p class="card-text text-muted mb-0">The ontology files are not publicly released.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ontological stack -->
+  <div class="section-label mb-1">Ontological Stack</div>
+  <p class="text-muted small mb-3">Phase 1 layers are <strong>adopted</strong>. Phase 2 layers are <strong>proposed candidate standards</strong> — a planned direction, not yet finalized or implemented. See the <a href="classes.html">Class &amp; Property Reference</a> for the Phase 1 layers in full detail.</p>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered align-middle bg-white shadow-sm rounded">
+      <thead class="table-dark">
+        <tr>
+          <th>Layer</th>
+          <th>Ontology / Standard</th>
+          <th>Role in ECMO-CO</th>
+          <th style="width:110px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="stack-divider"><td colspan="4">Phase 1 — adopted (v0.1)</td></tr>
+        <tr>
+          <td>Upper level</td>
+          <td><strong>BFO 2020</strong></td>
+          <td>Every ECMO-CO class sits under a BFO continuant or occurrent class</td>
+          <td class="text-center"><span class="badge-adopted">Adopted</span></td>
+        </tr>
+        <tr>
+          <td>Anatomical mapping</td>
+          <td><strong>FMA</strong> (Foundational Model of Anatomy)</td>
+          <td>FMA is a SKOS annotation mapping, not an import. <code>AnatomicalStructure</code>, <code>AnatomicalSpace</code>, <code>AccessVessel</code>, <code>AccessArtery</code> and <code>PortionOfCircuitBlood</code> carry SKOS match annotations to FMA classes.</td>
+          <td class="text-center"><span class="badge-adopted">Adopted</span></td>
+        </tr>
+        <tr>
+          <td>Vocabulary</td>
+          <td><strong>SKOS / DCterms</strong></td>
+          <td>A SKOS definition on every class; examples and editorial notes on most</td>
+          <td class="text-center"><span class="badge-adopted">Adopted</span></td>
+        </tr>
+        <tr class="stack-divider proposed"><td colspan="4">Phase 2 — proposed candidate standards (not yet finalized)</td></tr>
+        <tr class="row-proposed">
+          <td>Sensor / observation</td>
+          <td><strong>SOSA / SSN</strong> (W3C) <span class="text-muted">— candidate</span></td>
+          <td>Pressure sensors, flow sensors, gas-exchange monitoring</td>
+          <td class="text-center"><span class="badge-proposed">Proposed</span></td>
+        </tr>
+        <tr class="row-proposed">
+          <td>Provenance</td>
+          <td><strong>PROV-O</strong> (W3C) <span class="text-muted">— candidate</span></td>
+          <td>Dataset lineage, registry data provenance</td>
+          <td class="text-center"><span class="badge-proposed">Proposed</span></td>
+        </tr>
+        <tr class="row-proposed">
+          <td>Measurement</td>
+          <td><strong>QUDT</strong> <span class="text-muted">— candidate</span></td>
+          <td>Flow rates (L/min), pressures (mmHg), FiO₂</td>
+          <td class="text-center"><span class="badge-proposed">Proposed</span></td>
+        </tr>
+        <tr class="row-proposed">
+          <td>Information artifact</td>
+          <td><strong>IAO / OBI</strong> <span class="text-muted">— candidate</span></td>
+          <td>Replace Phase 1 curation-status placeholder; data items</td>
+          <td class="text-center"><span class="badge-proposed">Proposed</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ABox coverage -->
+  <div class="section-label mb-1">Phase 1 ABox Scenario Coverage</div>
+  <p class="text-muted small mb-3">Synthetic test scenarios in the ECMO-CO test harness; five of them are shown as worked examples.</p>
+  <div class="row g-3 mb-5">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-semibold mb-3">Cannulation Modes</h6>
+          <ul class="mb-0 small">
+            <li>V-V (standard two-site: femoral/IJ)</li>
+            <li>V-A (peripheral: femoral/femoral)</li>
+            <li>V-AV (femoral-vein drainage; return to the femoral artery and the right internal jugular vein)</li>
+            <li>AVALON dual-lumen (single-site IJ)</li>
+            <li>ECPR (emergency V-A)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-semibold mb-3">Complex Topologies</h6>
+          <ul class="mb-0 small">
+            <li>Multi-epoch V-V → V-A configuration change</li>
+            <li>Parallel oxygenators (same V-V mode, serial → parallel topology)</li>
+            <li>Dual concurrent circuits</li>
+            <li>Full circuit change (pump, oxygenator and tubing replaced; cannulae kept)</li>
+            <li>CRRT integration (adjunct non-ECMO device)</li>
+            <li>Impella co-management (venting device)</li>
+            <li>INVALID negative fixture (confirms SHACL rejection)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citation -->
+  <div class="alert alert-light border shadow-sm">
+    <strong>Cite this resource:</strong><br>
+    ECMO-CO project, Stony Brook University. <em>ECMO-CO: ECMO Circuit Ontology — Website v1 (pilot), ECMO-CO v0.1.</em> 2026.
+    <br><span class="text-muted small">Pilot demonstrator — persistent IRI registration pending.</span>
+  </div>
+
+  <div data-ecmoco-disclaimer class="ecmoco-disclaimer alert alert-warning mb-0">
+    <strong>Research prototype, not clinical guidance.</strong> All scenarios and patients shown are synthetic test instances; none is derived from real patient data. This is not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+
+</div>
+
+<footer class="py-4 mt-4">
+  <div class="container d-flex justify-content-between flex-wrap gap-2 align-items-center">
+    <span>ECMO-CO project, Stony Brook University · Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span>
+    <div class="d-flex gap-3">
+      <a href="graph/index.html">Graph</a>
+      <a href="example/index.html">Examples</a>
+      <a href="classes.html">Class Reference</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

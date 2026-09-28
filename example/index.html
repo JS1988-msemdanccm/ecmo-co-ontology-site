@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — Clinical Worked Examples</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8F9FA; }
+    .topbar { background: #0D1B2A; color: #E3F2FD; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .topbar a { color: #90CAF9; text-decoration: none; font-size: 0.85rem; }
+    .topbar .title { font-weight: 700; font-size: 0.95rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; }
+    .mode-badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; }
+    .badge-vv  { background: #E3F2FD; color: #0D47A1; }
+    .badge-va  { background: #FFF3E0; color: #E65100; }
+    .badge-vva { background: linear-gradient(90deg,#E3F2FD,#FFF3E0); color: #5C3317; border: 1px solid #FFD54F; }
+    .badge-complex { background: #F3E5F5; color: #6A1B9A; }
+    .scenario-card { text-decoration: none; color: inherit; display: block; transition: transform 0.18s, box-shadow 0.18s; }
+    .scenario-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.12); color: inherit; }
+    .scenario-card .card { border: 1px solid #E0E0E0; }
+    .scenario-card:hover .card { border-color: #90CAF9; }
+    .feature-tag { display: inline-block; background: #F5F5F5; color: #424242; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; margin: 2px; }
+    .circuit-thumb { width: 100%; height: 90px; border-radius: 6px; display: block; }
+    footer { background: #263238; color: #B0BEC5; }
+    footer a { color: #90CAF9; }
+    .ecmoco-banner { background: #FFF8E1; color: #5D4037; font-size: 0.8rem; text-align: center; padding: 0.35rem 1rem; border-bottom: 1px solid #FFE082; }
+    .ecmoco-disclaimer { font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<div data-ecmoco-banner class="ecmoco-banner">Research demonstrator (pilot) · Website v1 · ECMO-CO v0.1</div>
+
+<div class="topbar">
+  <a href="../index.html">← ECMO-CO Home</a>
+  <span class="title">Clinical Worked Examples</span>
+  <span style="color:#546E7A; font-size:0.8rem">5 annotated synthetic ABox scenarios · Phase 1 v0.1</span>
+</div>
+
+<div class="container my-4">
+  <div class="section-label mb-1">About these examples</div>
+  <p class="text-muted mb-4" style="font-size:0.9rem">The five scenarios below are a <strong>subset</strong> of the <strong>17 ABox scenario files</strong> (16 clinical scenarios + 1 negative fixture) in the ECMO-CO test harness, chosen to span the modelling range. Each is a synthetic Phase 1 ABox instance showing how ECMO-CO encodes an ECMO configuration. The pages show illustrative excerpts of the scenario files at the commit named in the page footer. Click any card to view the RDF excerpt and circuit diagram.</p>
+
+  <div class="row g-4">
+
+    <!-- 1. VV Femoral-IJ -->
+    <div class="col-md-6 col-xl-4">
+      <a href="vv-femoral-ij.html" class="scenario-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="mode-badge badge-vv">V-V</span>
+              <span class="text-muted" style="font-size:0.75rem">Scenario 1</span>
+            </div>
+            <h5 class="card-title mb-1">V-V Femoral–IJ</h5>
+            <p class="text-muted small mb-3">Canonical two-site veno-venous support. Femoral vein drainage (25 Fr) → pump → oxygenator → IJ return (21 Fr). Full 5-connection port-to-port topology encoded.</p>
+            <svg class="circuit-thumb mb-3" viewBox="0 0 340 90" style="background:#1A1A2E; border:1px solid #263238;">
+              <defs><marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#90CAF9"/></marker></defs>
+              <rect x="5" y="30" width="55" height="30" rx="4" fill="#C62828"/><text x="32" y="49" text-anchor="middle" font-size="9" fill="white">Patient</text>
+              <rect x="75" y="30" width="55" height="30" rx="4" fill="#1976D2"/><text x="102" y="44" text-anchor="middle" font-size="8" fill="white">FemV</text><text x="102" y="54" text-anchor="middle" font-size="7" fill="#90CAF9">25 Fr drain</text>
+              <rect x="145" y="15" width="45" height="25" rx="4" fill="#E65100"/><text x="167" y="31" text-anchor="middle" font-size="8" fill="white">Pump</text>
+              <rect x="145" y="50" width="45" height="25" rx="4" fill="#2E7D32"/><text x="167" y="66" text-anchor="middle" font-size="8" fill="white">Oxy</text>
+              <rect x="205" y="30" width="55" height="30" rx="4" fill="#1976D2"/><text x="232" y="44" text-anchor="middle" font-size="8" fill="white">IJ 21 Fr</text><text x="232" y="54" text-anchor="middle" font-size="7" fill="#90CAF9">return</text>
+              <rect x="275" y="30" width="55" height="30" rx="4" fill="#C62828"/><text x="302" y="49" text-anchor="middle" font-size="9" fill="white">Patient</text>
+              <line x1="60" y1="45" x2="75" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a1)"/>
+              <line x1="130" y1="40" x2="145" y2="30" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a1)"/>
+              <line x1="190" y1="28" x2="145" y2="63" stroke="#90CAF9" stroke-width="1.5"/>
+              <line x1="190" y1="63" x2="205" y2="50" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a1)"/>
+              <line x1="260" y1="45" x2="275" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a1)"/>
+              <text x="170" y="88" text-anchor="middle" font-size="8" fill="#546E7A">5 CircuitConnections · 2 LumenConduits · Full port topology</text>
+            </svg>
+            <div>
+              <span class="feature-tag">5 CircuitConnections</span>
+              <span class="feature-tag">Function vs Role</span>
+              <span class="feature-tag">Port mereology</span>
+              <span class="feature-tag">BloodFlowProcess</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View scenario →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 2. AVALON Dual-Lumen -->
+    <div class="col-md-6 col-xl-4">
+      <a href="avalon.html" class="scenario-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="mode-badge badge-vv">V-V</span>
+              <span class="text-muted" style="font-size:0.75rem">Scenario 2</span>
+            </div>
+            <h5 class="card-title mb-1">AVALON Dual-Lumen Single-Cannula</h5>
+            <p class="text-muted small mb-3">Single AVALON 27 Fr cannula via right IJ. Two coaxial LumenConduits within one Cannula: drainage (IVC + SVC fenestrations) and return (RA fenestration → tricuspid). No separate drainage cannula.</p>
+            <svg class="circuit-thumb mb-3" viewBox="0 0 340 90" style="background:#1A1A2E; border:1px solid #263238;">
+              <defs><marker id="a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#90CAF9"/></marker></defs>
+              <rect x="130" y="10" width="80" height="70" rx="6" fill="#1976D2" fill-opacity="0.3" stroke="#1976D2" stroke-width="1.5"/>
+              <text x="170" y="30" text-anchor="middle" font-size="8" fill="#81D4FA">AVALON 27 Fr</text>
+              <rect x="138" y="36" width="30" height="18" rx="3" fill="#42A5F5"/>
+              <text x="153" y="47" text-anchor="middle" font-size="7" fill="#0D1B2A">Drain</text>
+              <rect x="172" y="36" width="30" height="18" rx="3" fill="#42A5F5"/>
+              <text x="187" y="47" text-anchor="middle" font-size="7" fill="#0D1B2A">Return</text>
+              <rect x="5" y="30" width="55" height="30" rx="4" fill="#C62828"/><text x="32" y="49" text-anchor="middle" font-size="9" fill="white">Patient</text>
+              <rect x="275" y="30" width="55" height="30" rx="4" fill="#C62828"/><text x="302" y="49" text-anchor="middle" font-size="9" fill="white">Patient</text>
+              <rect x="148" y="62" width="45" height="16" rx="3" fill="#546E7A"/>
+              <text x="170" y="73" text-anchor="middle" font-size="7" fill="white">Pump/Oxy</text>
+              <line x1="60" y1="42" x2="138" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a2)"/>
+              <line x1="202" y1="45" x2="275" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a2)"/>
+              <text x="32" y="22" text-anchor="middle" font-size="7" fill="#CE93D8">IVC + SVC</text>
+              <text x="32" y="31" text-anchor="middle" font-size="7" fill="#CE93D8">fenestrations</text>
+              <text x="302" y="22" text-anchor="middle" font-size="7" fill="#A5D6A7">RA return</text>
+              <text x="302" y="31" text-anchor="middle" font-size="7" fill="#A5D6A7">fenestration</text>
+              <text x="170" y="88" text-anchor="middle" font-size="8" fill="#546E7A">2 LumenConduits · 3 CannulaFenestrations · single-site</text>
+            </svg>
+            <div>
+              <span class="feature-tag">Multi-lumen Cannula</span>
+              <span class="feature-tag">CannulaFenestration</span>
+              <span class="feature-tag">opensInto</span>
+              <span class="feature-tag">Single-site access</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View scenario →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 3. VA Peripheral Femoral -->
+    <div class="col-md-6 col-xl-4">
+      <a href="va-peripheral.html" class="scenario-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="mode-badge badge-va">V-A</span>
+              <span class="text-muted" style="font-size:0.75rem">Scenario 3</span>
+            </div>
+            <h5 class="card-title mb-1">V-A Peripheral Femoral</h5>
+            <p class="text-muted small mb-3">Cardiogenic shock. Right femoral vein drainage (25 Fr) to left femoral artery return (17 Fr) with an adjunct distal limb perfusion catheter (8 Fr SFA) to prevent leg ischemia.</p>
+            <svg class="circuit-thumb mb-3" viewBox="0 0 340 90" style="background:#1A1A2E; border:1px solid #263238;">
+              <defs><marker id="a4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#90CAF9"/></marker>
+              <marker id="a4y" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#FFD54F"/></marker></defs>
+              <rect x="5" y="25" width="50" height="22" rx="4" fill="#C62828"/><text x="30" y="40" text-anchor="middle" font-size="8" fill="white">Patient</text>
+              <rect x="70" y="25" width="50" height="22" rx="4" fill="#1976D2"/><text x="95" y="37" text-anchor="middle" font-size="7.5" fill="white">FemV 25Fr</text>
+              <rect x="135" y="12" width="35" height="18" rx="3" fill="#E65100"/><text x="152" y="24" text-anchor="middle" font-size="7.5" fill="white">Pump</text>
+              <rect x="135" y="35" width="35" height="18" rx="3" fill="#2E7D32"/><text x="152" y="47" text-anchor="middle" font-size="7.5" fill="white">Oxy</text>
+              <rect x="185" y="25" width="50" height="22" rx="4" fill="#1976D2"/><text x="210" y="37" text-anchor="middle" font-size="7.5" fill="white">FemA 17Fr</text>
+              <rect x="250" y="25" width="50" height="22" rx="4" fill="#C62828"/><text x="275" y="37" text-anchor="middle" font-size="8" fill="white">Patient</text>
+              <rect x="185" y="62" width="50" height="18" rx="3" fill="#F9A825"/><text x="210" y="74" text-anchor="middle" font-size="7" fill="white">DistalPerf 8Fr</text>
+              <line x1="55" y1="36" x2="70" y2="36" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a4)"/>
+              <line x1="120" y1="32" x2="135" y2="22" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a4)"/>
+              <line x1="170" y1="21" x2="135" y2="44" stroke="#90CAF9" stroke-width="1.5"/>
+              <line x1="170" y1="44" x2="185" y2="34" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a4)"/>
+              <line x1="235" y1="36" x2="250" y2="36" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a4)"/>
+              <line x1="210" y1="47" x2="210" y2="62" stroke="#FFD54F" stroke-width="1.5" marker-end="url(#a4y)"/>
+              <text x="170" y="88" text-anchor="middle" font-size="8" fill="#546E7A">3 Cannula individuals · distal perfusion catheter · VA-mode</text>
+            </svg>
+            <div>
+              <span class="feature-tag">VA-mode</span>
+              <span class="feature-tag">3 Cannulae</span>
+              <span class="feature-tag">Distal perf cath</span>
+              <span class="feature-tag">Cardiogenic shock</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View scenario →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 4. Central VA Post-Cardiotomy -->
+    <div class="col-md-6 col-xl-4">
+      <a href="va-central.html" class="scenario-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="mode-badge badge-va">V-A</span>
+              <span class="text-muted" style="font-size:0.75rem">Scenario 4</span>
+            </div>
+            <h5 class="card-title mb-1">Central V-A Post-Cardiotomy</h5>
+            <p class="text-muted small mb-3">Failure to wean from CPB. Right atrial drainage (32 Fr transthoracic) → ascending aortic return (22 Fr transthoracic). Sternum open.</p>
+            <svg class="circuit-thumb mb-3" viewBox="0 0 340 90" style="background:#1A1A2E; border:1px solid #263238;">
+              <defs><marker id="a5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#90CAF9"/></marker></defs>
+              <rect x="5" y="20" width="75" height="50" rx="6" fill="#C62828" fill-opacity="0.4" stroke="#C62828" stroke-width="1.5"/>
+              <text x="42" y="38" text-anchor="middle" font-size="8" fill="#FFCDD2">Patient</text>
+              <text x="42" y="50" text-anchor="middle" font-size="7" fill="#FFCDD2">(sternum open)</text>
+              <rect x="15" y="53" width="28" height="14" rx="3" fill="#1976D2"/>
+              <text x="29" y="63" text-anchor="middle" font-size="6.5" fill="white">RA 32Fr</text>
+              <rect x="48" y="53" width="28" height="14" rx="3" fill="#1976D2"/>
+              <text x="62" y="63" text-anchor="middle" font-size="6.5" fill="white">AscAo 22Fr</text>
+              <rect x="100" y="25" width="40" height="20" rx="3" fill="#E65100"/>
+              <text x="120" y="38" text-anchor="middle" font-size="8" fill="white">Pump</text>
+              <rect x="100" y="50" width="40" height="20" rx="3" fill="#2E7D32"/>
+              <text x="120" y="63" text-anchor="middle" font-size="8" fill="white">Oxy</text>
+              <rect x="200" y="33" width="130" height="24" rx="4" fill="#37474F"/>
+              <text x="265" y="43" text-anchor="middle" font-size="7.5" fill="#90A4AE">VA-mode · 2 Cannula individuals</text>
+              <text x="265" y="53" text-anchor="middle" font-size="7" fill="#90CAF9">RA drainage → AscAo return</text>
+              <line x1="29" y1="53" x2="100" y2="35" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a5)"/>
+              <line x1="140" y1="60" x2="62" y2="60" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a5)"/>
+              <text x="170" y="88" text-anchor="middle" font-size="8" fill="#546E7A">transthoracic cannulae · post-CPB · VA-mode</text>
+            </svg>
+            <div>
+              <span class="feature-tag">VA-mode</span>
+              <span class="feature-tag">Transthoracic</span>
+              <span class="feature-tag">Post-CPB</span>
+              <span class="feature-tag">RA→AscAo</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View scenario →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 5. Parallel Oxygenators -->
+    <div class="col-md-6 col-xl-4">
+      <a href="parallel-oxygenators.html" class="scenario-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="mode-badge badge-complex">V-V · Complex</span>
+              <span class="text-muted" style="font-size:0.75rem">Scenario 5</span>
+            </div>
+            <h5 class="card-title mb-1">Parallel Oxygenators</h5>
+            <p class="text-muted small mb-3">Severe ARDS with refractory hypercapnia. Second oxygenator added in parallel via Y-pieces (Epoch 2). The mode stays V-V while the topology changes from serial to parallel oxygenators, so the mode classifier alone does not describe the circuit.</p>
+            <svg class="circuit-thumb mb-3" viewBox="0 0 340 90" style="background:#1A1A2E; border:1px solid #263238;">
+              <defs><marker id="a6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#90CAF9"/></marker></defs>
+              <rect x="5" y="30" width="45" height="30" rx="4" fill="#C62828"/><text x="27" y="49" text-anchor="middle" font-size="8" fill="white">Patient</text>
+              <rect x="62" y="30" width="38" height="30" rx="4" fill="#E65100"/><text x="81" y="49" text-anchor="middle" font-size="8" fill="white">Pump</text>
+              <rect x="115" y="38" width="14" height="14" rx="3" fill="#F9A825"/><text x="122" y="48" text-anchor="middle" font-size="7" fill="white">Y</text>
+              <rect x="140" y="12" width="40" height="22" rx="3" fill="#2E7D32"/><text x="160" y="27" text-anchor="middle" font-size="8" fill="white">Oxy A</text>
+              <rect x="140" y="56" width="40" height="22" rx="3" fill="#2E7D32" stroke="#FFD54F" stroke-width="1.5"/><text x="160" y="71" text-anchor="middle" font-size="8" fill="white">Oxy B</text>
+              <rect x="195" y="38" width="14" height="14" rx="3" fill="#F9A825"/><text x="202" y="48" text-anchor="middle" font-size="7" fill="white">Y</text>
+              <rect x="222" y="30" width="55" height="30" rx="4" fill="#1976D2"/><text x="249" y="45" text-anchor="middle" font-size="7.5" fill="white">IJ Return</text>
+              <rect x="290" y="30" width="45" height="30" rx="4" fill="#C62828"/><text x="312" y="49" text-anchor="middle" font-size="8" fill="white">Patient</text>
+              <line x1="50" y1="45" x2="62" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="100" y1="45" x2="115" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="122" y1="38" x2="140" y2="24" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="122" y1="52" x2="140" y2="64" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="180" y1="24" x2="202" y2="38" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="180" y1="67" x2="202" y2="52" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="209" y1="45" x2="222" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <line x1="277" y1="45" x2="290" y2="45" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#a6)"/>
+              <text x="160" y="88" text-anchor="middle" font-size="8" fill="#546E7A">2 epochs · Y-piece topology · same mode, different topology</text>
+            </svg>
+            <div>
+              <span class="feature-tag">2 Oxygenators</span>
+              <span class="feature-tag">Y-piece topology</span>
+              <span class="feature-tag">Same mode, new topology</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-3">
+            <span class="text-primary small fw-semibold">View scenario →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div><!-- /row -->
+
+  <div class="d-flex justify-content-between align-items-center py-3 border-top mt-4">
+    <a href="../index.html" class="btn btn-outline-secondary btn-sm">← ECMO-CO Home</a>
+    <span class="text-muted small">ECMO-CO Phase 1 · v0.1 · 5 of 17 ABox scenarios shown · 2026</span>
+    <a href="../graph/index.html" class="btn btn-outline-primary btn-sm">Ontology Graph →</a>
+  </div>
+
+  <div data-ecmoco-disclaimer class="ecmoco-disclaimer alert alert-warning mb-0">
+    <strong>Research prototype, not clinical guidance.</strong> All scenarios and patients shown are synthetic test instances; none is derived from real patient data. This is not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+</div>
+
+<footer class="py-4 mt-4">
+  <div class="container d-flex justify-content-between flex-wrap gap-2 align-items-center">
+    <span>ECMO-CO project, Stony Brook University · Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span>
+    <div class="d-flex gap-3">
+      <a href="../index.html">Home</a>
+      <a href="../graph/index.html">Graph</a>
+      <a href="../classes.html">Class Reference</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

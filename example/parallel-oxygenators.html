@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — Parallel Oxygenators</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8F9FA; }
+    .topbar { background: #0D1B2A; color: #E3F2FD; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .topbar a { color: #90CAF9; text-decoration: none; font-size: 0.85rem; }
+    .topbar .title { font-weight: 700; font-size: 0.95rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; }
+    .mode-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.75rem; font-weight:700; background:#E3F2FD; color:#0D47A1; }
+    .mode-badge-complex { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.75rem; font-weight:700; background:#E8F5E9; color:#1B5E20; }
+    pre.rdf { background:#1A1A2E; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #263238; margin:0; }
+    .rdf .prefix { color:#90CAF9; } .rdf .uri { color:#80CBC4; } .rdf .eco { color:#81D4FA; } .rdf .lit { color:#A5D6A7; } .rdf .comment { color:#546E7A; font-style:italic; } .rdf .prop { color:#FFE082; }
+    pre.sparql { background:#0D1B2A; color:#E0E0E0; border-radius:8px; padding:1rem 1.2rem; font-size:0.78rem; line-height:1.65; overflow-x:auto; border:1px solid #1E3A5F; margin:0; }
+    .sparql .kw { color:#CE93D8; font-weight:600; } .sparql .var { color:#80CBC4; } .sparql .uri { color:#81D4FA; } .sparql .cmt { color:#546E7A; font-style:italic; }
+    .query-result { background:#1B5E20; color:#C8E6C9; border-radius:6px; padding:0.6rem 1rem; font-size:0.82rem; font-family:monospace; margin-top:0.5rem; white-space:pre; overflow-x:auto; }
+    .eco-feature { background:#E8F5E9; border-left:4px solid #1B5E20; padding:0.5rem 0.75rem; margin-bottom:0.5rem; font-size:0.85rem; border-radius:0 4px 4px 0; }
+    code { background:#F3F4F6; padding:2px 5px; border-radius:3px; font-size:0.85em; color:#1565C0; }
+    .epoch-1 { background: #E3F2FD; border-radius: 6px; padding: 0.4rem 0.7rem; border-left: 3px solid #1976D2; font-size: 0.82rem; margin-bottom: 0.5rem; }
+    .epoch-2 { background: #E8F5E9; border-radius: 6px; padding: 0.4rem 0.7rem; border-left: 3px solid #2E7D32; font-size: 0.82rem; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+<div data-ecmoco-banner class="text-center small py-1" style="background:#FFF3CD; color:#664D03;">Research prototype (pilot) · synthetic example · not clinical guidance</div>
+<div class="topbar">
+  <a href="../index.html">← ECMO-CO Home</a>
+  <span style="color:#37474F">|</span>
+  <a href="index.html">← Examples</a>
+  <span class="title">Parallel Oxygenators (two-epoch, same V-V mode)</span>
+  <span class="mode-badge">V-V</span>
+  <span class="mode-badge-complex">Complex topology</span>
+</div>
+
+<div class="container my-4">
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="section-label mb-2">Clinical Scenario</div>
+          <h4 class="mb-3">V-V ECMO — Refractory Hypercapnia, Second Oxygenator Added in Parallel</h4>
+          <p>Adult patient with severe ARDS. Initial single-oxygenator V-V circuit fails to achieve adequate CO₂ clearance despite maximum sweep gas flow. A second membrane oxygenator is added in <strong>parallel</strong> via a Y-connector on the post-pump limb, doubling the effective membrane surface area.</p>
+
+          <div class="epoch-1"><strong>Epoch 1</strong> (2026-05-08 12:00 to 2026-05-11 09:15 UTC): standard single-oxygenator V-V; FemV drainage → Pump → Oxy_A → IJ return</div>
+          <div class="epoch-2"><strong>Epoch 2</strong> (from 2026-05-11 09:15 UTC): parallel configuration added; post-pump flow splits at Y-piece to Oxy_A and Oxy_B, recombines at downstream Y-piece before return cannula</div>
+
+          <p class="small text-muted">Both epochs share the V-V mode. The ELSO Registry records each membrane lung with its own start and end time and a concurrent-use flag, but does not capture how concurrent membrane lungs are connected (in series or in parallel).</p>
+          <hr class="my-3">
+          <div class="section-label mb-2">Key ECMO-CO Features in This Scenario</div>
+          <div class="eco-feature"><strong>Two CannulationConfiguration epochs on one ECMORun</strong> — same ECMORun individual; Epoch 1 ends at 2026-05-11T09:15:00Z, Epoch 2 begins at the same time. Both epochs are about the same patient and circuit individuals.</div>
+          <div class="eco-feature"><strong>Circuit aggregate with &gt;1 Oxygenator</strong> — <code>ecmo-co:ECMOCircuit</code> <code>bfo:0000178</code> lists both Oxy_A and Oxy_B as members. Epoch 1 config <code>ecmo-co:isAbout</code> only Oxy_A; Epoch 2 config <code>ecmo-co:isAbout</code> both — capturing when each oxygenator entered the active configuration.</div>
+          <div class="eco-feature"><strong>Parallel section via CircuitConnection</strong> — four <code>ecmo-co:CircuitConnection</code> GDC records asserted by Epoch 2: Y→OxyA, Y→OxyB (upstream split), OxyA→Y, OxyB→Y (downstream recombine). The two split connections leave the same post-pump Y-piece through its two outlet ports, each port part of (<code>bfo:0000176</code>) that Y-piece. The connections cover the parallel section only: the pump and cannulae carry no Ports in this scenario, so the path to and from the patient is not represented. The ELSO Registry does not capture port-level connections.</div>
+          <div class="eco-feature"><strong>Mode alone does not describe the circuit</strong> — the Epoch 2 <code>rdfs:comment</code> reads: "Same mode (V-V); circuit topology changes from serial to parallel oxygenators. Demonstrates that mode-classifier alone is insufficient to characterise circuit configuration."</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">Circuit Diagrams (Epoch 1 → Epoch 2)</div>
+          <svg viewBox="0 0 600 380" width="100%" style="background:#1A1A2E; border-radius:8px; border:1px solid #263238;">
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#90CAF9"/>
+              </marker>
+              <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#A5D6A7"/>
+              </marker>
+              <marker id="arro" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#FFE082"/>
+              </marker>
+            </defs>
+
+            <!-- EPOCH 1 header -->
+            <rect x="8" y="8" width="580" height="14" rx="3" fill="#1565C0" opacity="0.6"/>
+            <text x="300" y="19" text-anchor="middle" font-size="8.5" fill="white" font-weight="bold">EPOCH 1 — single oxygenator · from 2026-05-08 12:00 UTC (schematic)</text>
+
+            <!-- Patient -->
+            <rect x="10" y="30" width="56" height="36" rx="4" fill="#C62828"/>
+            <text x="38" y="44" text-anchor="middle" font-size="8" fill="white" font-weight="bold">PATIENT</text>
+            <text x="38" y="56" text-anchor="middle" font-size="7" fill="#FFCDD2">FemV/IJ</text>
+
+            <!-- FemV -->
+            <rect x="76" y="34" width="52" height="26" rx="4" fill="#1565C0"/>
+            <text x="102" y="49" text-anchor="middle" font-size="7.5" fill="white">FemV drain</text>
+
+            <!-- Drain tube -->
+            <rect x="138" y="36" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="160" y="50" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <!-- Pump -->
+            <rect x="192" y="30" width="48" height="34" rx="4" fill="#4CAF50"/>
+            <text x="216" y="44" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">PUMP</text>
+            <text x="216" y="56" text-anchor="middle" font-size="7" fill="#C8E6C9">centrif.</text>
+
+            <!-- Post-pump tube -->
+            <rect x="250" y="36" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="272" y="50" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <!-- Oxy A only -->
+            <rect x="304" y="26" width="60" height="42" rx="4" fill="#7B1FA2"/>
+            <text x="334" y="41" text-anchor="middle" font-size="8" fill="white" font-weight="bold">Oxy A</text>
+            <text x="334" y="52" text-anchor="middle" font-size="7" fill="#E1BEE7">PMP</text>
+            <text x="334" y="62" text-anchor="middle" font-size="7" fill="#E1BEE7">membrane</text>
+
+            <!-- Return tube -->
+            <rect x="374" y="36" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="396" y="50" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <!-- IJ return -->
+            <rect x="428" y="30" width="52" height="34" rx="4" fill="#C62828"/>
+            <text x="454" y="43" text-anchor="middle" font-size="7.5" fill="white">IJ return</text>
+            <text x="454" y="55" text-anchor="middle" font-size="7" fill="#FFCDD2">cannula</text>
+
+            <!-- Config label -->
+            <rect x="490" y="28" width="100" height="38" rx="4" fill="#1565C0" opacity="0.4"/>
+            <text x="540" y="42" text-anchor="middle" font-size="7.5" fill="#BBDEFB">Config_Epoch1</text>
+            <text x="540" y="52" text-anchor="middle" font-size="7" fill="#90CAF9">ecmo-co:VV-mode</text>
+            <text x="540" y="62" text-anchor="middle" font-size="7" fill="#90CAF9">1 oxygenator</text>
+
+            <!-- Epoch 1 arrows -->
+            <line x1="66" y1="47" x2="76" y2="47" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="128" y1="47" x2="138" y2="47" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="182" y1="47" x2="192" y2="47" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="240" y1="47" x2="250" y2="47" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="294" y1="47" x2="304" y2="47" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="364" y1="47" x2="374" y2="47" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="418" y1="47" x2="428" y2="47" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+
+            <!-- EPOCH 2 header -->
+            <rect x="8" y="82" width="580" height="14" rx="3" fill="#2E7D32" opacity="0.7"/>
+            <text x="300" y="93" text-anchor="middle" font-size="8.5" fill="white" font-weight="bold">EPOCH 2 — parallel oxygenators · from 2026-05-11 09:15 UTC · same VV-mode (schematic)</text>
+
+            <!-- Epoch 2 circuit — same patient/cannulae, Y-piece splits to two Oxys -->
+            <rect x="10" y="104" width="56" height="36" rx="4" fill="#C62828"/>
+            <text x="38" y="118" text-anchor="middle" font-size="8" fill="white" font-weight="bold">PATIENT</text>
+            <text x="38" y="130" text-anchor="middle" font-size="7" fill="#FFCDD2">FemV/IJ</text>
+
+            <rect x="76" y="108" width="52" height="26" rx="4" fill="#1565C0"/>
+            <text x="102" y="123" text-anchor="middle" font-size="7.5" fill="white">FemV drain</text>
+
+            <rect x="138" y="110" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="160" y="124" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <rect x="192" y="104" width="48" height="34" rx="4" fill="#4CAF50"/>
+            <text x="216" y="118" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">PUMP</text>
+            <text x="216" y="130" text-anchor="middle" font-size="7" fill="#C8E6C9">centrif.</text>
+
+            <rect x="250" y="110" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="272" y="124" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <!-- Y-piece upstream split -->
+            <rect x="304" y="104" width="38" height="34" rx="4" fill="#546E7A"/>
+            <text x="323" y="118" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">Y-in</text>
+            <text x="323" y="130" text-anchor="middle" font-size="7" fill="#B0BEC5">split</text>
+
+            <!-- Oxy A upper branch -->
+            <rect x="358" y="96" width="52" height="28" rx="4" fill="#7B1FA2"/>
+            <text x="384" y="108" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">Oxy A</text>
+            <text x="384" y="118" text-anchor="middle" font-size="7" fill="#E1BEE7">existing</text>
+
+            <!-- Oxy B lower branch -->
+            <rect x="358" y="134" width="52" height="28" rx="4" fill="#4A148C"/>
+            <text x="384" y="146" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">Oxy B</text>
+            <text x="384" y="156" text-anchor="middle" font-size="7" fill="#E1BEE7">added Ep2</text>
+
+            <!-- Y-piece downstream recombine -->
+            <rect x="422" y="104" width="40" height="62" rx="4" fill="#546E7A"/>
+            <text x="442" y="130" text-anchor="middle" font-size="7.5" fill="white" font-weight="bold">Y-out</text>
+            <text x="442" y="142" text-anchor="middle" font-size="7" fill="#B0BEC5">recomb.</text>
+
+            <!-- Return tube + IJ -->
+            <rect x="472" y="110" width="44" height="22" rx="3" fill="#37474F"/>
+            <text x="494" y="124" text-anchor="middle" font-size="7" fill="#B0BEC5">tube</text>
+
+            <rect x="526" y="104" width="52" height="34" rx="4" fill="#C62828"/>
+            <text x="552" y="117" text-anchor="middle" font-size="7.5" fill="white">IJ return</text>
+            <text x="552" y="129" text-anchor="middle" font-size="7" fill="#FFCDD2">cannula</text>
+
+            <!-- Config Epoch 2 label -->
+            <rect x="8" y="168" width="108" height="26" rx="3" fill="#2E7D32" opacity="0.4"/>
+            <text x="62" y="179" text-anchor="middle" font-size="7" fill="#A5D6A7">Config_Epoch2</text>
+            <text x="62" y="189" text-anchor="middle" font-size="6.5" fill="#81C784">VV-mode · 2 oxygenators</text>
+
+            <!-- Epoch 2 arrows -->
+            <line x1="66" y1="121" x2="76" y2="121" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="128" y1="121" x2="138" y2="121" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="182" y1="121" x2="192" y2="121" stroke="#90CAF9" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="240" y1="121" x2="250" y2="121" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="294" y1="121" x2="304" y2="121" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <!-- Y split to Oxy A (up) and Oxy B (down) -->
+            <line x1="342" y1="116" x2="358" y2="110" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <line x1="342" y1="126" x2="358" y2="146" stroke="#A5D6A7" stroke-width="1.5" marker-end="url(#arrg)"/>
+            <!-- Oxy outputs to Y-out -->
+            <line x1="410" y1="110" x2="422" y2="116" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="410" y1="148" x2="422" y2="140" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <!-- Y-out to return -->
+            <line x1="462" y1="121" x2="472" y2="121" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+            <line x1="516" y1="121" x2="526" y2="121" stroke="#FFE082" stroke-width="1.5" marker-end="url(#arro)"/>
+
+            <!-- Instance network divider -->
+            <line x1="8" y1="202" x2="592" y2="202" stroke="#263238" stroke-width="1"/>
+            <text x="300" y="214" text-anchor="middle" font-size="9" fill="#546E7A">ECMO-CO INSTANCE NETWORK — Epoch transition</text>
+
+            <!-- ECMORun node -->
+            <ellipse cx="300" cy="248" rx="68" ry="18" fill="#E65100" opacity="0.8"/>
+            <text x="300" y="245" text-anchor="middle" font-size="8" fill="white">ECMORun_POX01</text>
+            <text x="300" y="257" text-anchor="middle" font-size="7" fill="#FFE0B2">ecmo-co:ECMORun (single run)</text>
+
+            <!-- Config Epoch 1 -->
+            <rect x="68" y="288" width="96" height="34" rx="4" fill="#1565C0" opacity="0.7"/>
+            <text x="116" y="302" text-anchor="middle" font-size="7.5" fill="white">Config_Epoch1</text>
+            <text x="116" y="312" text-anchor="middle" font-size="7" fill="#BBDEFB">VV · ended 09:15</text>
+            <text x="116" y="321" text-anchor="middle" font-size="6.5" fill="#90CAF9">isAbout: Oxy_A only</text>
+
+            <!-- Config Epoch 2 -->
+            <rect x="220" y="288" width="116" height="34" rx="4" fill="#2E7D32" opacity="0.7"/>
+            <text x="278" y="302" text-anchor="middle" font-size="7.5" fill="white">Config_Epoch2</text>
+            <text x="278" y="312" text-anchor="middle" font-size="7" fill="#C8E6C9">VV · started 09:15</text>
+            <text x="278" y="321" text-anchor="middle" font-size="6.5" fill="#81C784">isAbout: Oxy_A + Oxy_B</text>
+
+            <!-- CircuitConnections -->
+            <rect x="400" y="288" width="180" height="62" rx="4" fill="#263238" opacity="0.9"/>
+            <text x="490" y="302" text-anchor="middle" font-size="7.5" fill="#80CBC4">CircuitConnections (Epoch 2)</text>
+            <text x="410" y="315" font-size="6.5" fill="#FFE082">CC_Y_to_OxyA: PostPump_Y_outA → OxyA_in</text>
+            <text x="410" y="326" font-size="6.5" fill="#FFE082">CC_Y_to_OxyB: PostPump_Y_outB → OxyB_in</text>
+            <text x="410" y="337" font-size="6.5" fill="#A5D6A7">CC_OxyA_to_Y: OxyA_out → PostOxy_Y_in_A</text>
+            <text x="410" y="348" font-size="6.5" fill="#A5D6A7">CC_OxyB_to_Y: OxyB_out → PostOxy_Y_in_B</text>
+
+            <!-- ECMORun → Epochs -->
+            <line x1="262" y1="260" x2="176" y2="288" stroke="#BBDEFB" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+            <line x1="315" y1="260" x2="305" y2="288" stroke="#81C784" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+            <text x="212" y="280" font-size="6.5" fill="#B0BEC5">hadEpoch</text>
+
+            <!-- Epoch 2 → CircuitConnections -->
+            <line x1="336" y1="305" x2="400" y2="305" stroke="#FFE082" stroke-width="1" marker-end="url(#arr)"/>
+            <text x="366" y="301" font-size="6.5" fill="#FFE082">assertsConn.</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELSO comparison -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="section-label mb-3">ELSO Registry vs ECMO-CO Representational Comparison</div>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="table-dark">
+                <tr><th style="width:24%">Concept</th><th>ELSO Registry (2026 form and data definitions)</th><th>ECMO-CO (this scenario)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mode across the two epochs</td><td>ECLS mode V-V; a mode-conversion entry is used only when the mode changes</td><td>Both epochs assert <code>ecmo-co:VV-mode</code>; both are <code>CannulationConfiguration</code> epochs of one <code>ECMORun</code> (<code>ecmo-co:hadConfigurationEpoch</code>), bounded by <code>ecmo-co:startedAt</code> / <code>ecmo-co:endedAt</code></td></tr>
+                <tr><td>The added oxygenator</td><td>One membrane-lung entry per device, each with start and end date/time, "Concurrent Membrane (Y/N)" and "Membrane Replaced (Y/N)"</td><td>Both oxygenators are members of the circuit (<code>bfo:0000178</code>); Epoch 1 <code>ecmo-co:isAbout</code> Oxy_A only, Epoch 2 both</td></tr>
+                <tr><td>How the two oxygenators are connected</td><td>Not captured: no field for series or parallel arrangement, and no port or connection fields</td><td>Four <code>ecmo-co:CircuitConnection</code> records asserted by Epoch 2 (<code>ecmo-co:assertsConnection</code>), from the post-pump Y-piece outlets to each oxygenator inlet and from each oxygenator outlet to a post-oxygenator Y-piece inlet</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-muted mt-2 mb-0">ELSO column: ELSO ECLS Registry Form v12.0 (01/12/2026), mode and membrane-lung sections; ELSO Registry Data Definitions (04/15/2026); ELSO XML import schema (01/05/2026).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RDF + SPARQL -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">ECMO-CO ABox — Formal Encoding (Turtle/RDF)</div>
+          <pre class="rdf" data-ecmoco-illustrative><span class="comment"># Scenario (synthetic) — two oxygenators in parallel within one V-V circuit. Excerpt.</span>
+<span class="comment"># Namespace declarations omitted.</span>
+
+<span class="eco">:Oxy_POX01_A</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Oxygenator</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Oxygenator A (parallel limb A)"@en</span> .
+<span class="eco">:Oxy_POX01_B</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Oxygenator</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Oxygenator B (parallel limb B, added at Epoch 2)"@en</span> .
+
+<span class="comment"># ── Post-pump Y-piece and its three ports (upstream split) ──</span>
+<span class="eco">:Tubing_PostPump_Y</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CircuitTubing</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Post-pump Y-piece (divergence: pump outlet -&gt; Oxygenators A and B)"@en</span> .
+<span class="eco">:Port_PostPump_Y_in</span>    <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Port</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Y-piece inlet port (single, from pump outlet)"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:Tubing_PostPump_Y</span> .
+<span class="eco">:Port_PostPump_Y_outA</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Port</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Y-piece outlet to Oxygenator A"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:Tubing_PostPump_Y</span> .
+<span class="eco">:Port_PostPump_Y_outB</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:Port</span> ;
+    <span class="prop">rdfs:label</span>  <span class="lit">"Y-piece outlet to Oxygenator B"@en</span> ;
+    <span class="prop">bfo:0000176</span>  <span class="eco">:Tubing_PostPump_Y</span> .
+
+<span class="comment"># ── Four CircuitConnections for the parallel section ──</span>
+<span class="eco">:CC_Y_to_OxyA</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CircuitConnection</span> ;
+    <span class="prop">ecmo-co:hasUpstreamPort</span>    <span class="eco">:Port_PostPump_Y_outA</span> ;
+    <span class="prop">ecmo-co:hasDownstreamPort</span>  <span class="eco">:Port_OxyA_in</span> .
+
+<span class="eco">:CC_Y_to_OxyB</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CircuitConnection</span> ;
+    <span class="prop">ecmo-co:hasUpstreamPort</span>    <span class="eco">:Port_PostPump_Y_outB</span> ;
+    <span class="prop">ecmo-co:hasDownstreamPort</span>  <span class="eco">:Port_OxyB_in</span> .
+
+<span class="eco">:CC_OxyA_to_Y</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CircuitConnection</span> ;
+    <span class="prop">ecmo-co:hasUpstreamPort</span>    <span class="eco">:Port_OxyA_out</span> ;
+    <span class="prop">ecmo-co:hasDownstreamPort</span>  <span class="eco">:Port_PostOxy_Y_in_A</span> .
+
+<span class="eco">:CC_OxyB_to_Y</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CircuitConnection</span> ;
+    <span class="prop">ecmo-co:hasUpstreamPort</span>    <span class="eco">:Port_OxyB_out</span> ;
+    <span class="prop">ecmo-co:hasDownstreamPort</span>  <span class="eco">:Port_PostOxy_Y_in_B</span> .
+
+<span class="comment"># ── Epoch 1: single oxygenator ──</span>
+<span class="eco">:Config_POX01_Epoch1</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulationConfiguration</span> ;
+    <span class="prop">rdfs:label</span>           <span class="lit">"Single-oxygenator V-V (initial)"@en</span> ;
+    <span class="prop">ecmo-co:startedAt</span>        <span class="lit">"2026-05-08T12:00:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:endedAt</span>          <span class="lit">"2026-05-11T09:15:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:hasModeAssertion</span>  <span class="eco">ecmo-co:VV-mode</span> ;
+    <span class="prop">ecmo-co:isAbout</span>  <span class="eco">:Patient_POX01</span> , <span class="eco">:Oxy_POX01_A</span> , <span class="eco">:Circuit_POX01</span> .
+
+<span class="comment"># ── Epoch 2: parallel section — SAME mode, different topology ──</span>
+<span class="eco">:Config_POX01_Epoch2</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:CannulationConfiguration</span> ;
+    <span class="prop">rdfs:label</span>           <span class="lit">"Parallel-oxygenator V-V (added second oxygenator)"@en</span> ;
+    <span class="prop">ecmo-co:startedAt</span>        <span class="lit">"2026-05-11T09:15:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:hasModeAssertion</span>  <span class="eco">ecmo-co:VV-mode</span> ;
+    <span class="prop">ecmo-co:isAbout</span>  <span class="eco">:Patient_POX01</span> , <span class="eco">:Oxy_POX01_A</span> ,
+                 <span class="eco">:Oxy_POX01_B</span> , <span class="eco">:Circuit_POX01</span> ;
+    <span class="prop">ecmo-co:assertsConnection</span>  <span class="eco">:CC_Y_to_OxyA</span> , <span class="eco">:CC_Y_to_OxyB</span> ,
+                           <span class="eco">:CC_OxyA_to_Y</span> , <span class="eco">:CC_OxyB_to_Y</span> ;
+    <span class="prop">rdfs:comment</span>  <span class="lit">"Same mode (V-V); circuit topology changes from serial to parallel oxygenators. Demonstrates that mode-classifier alone is insufficient to characterise circuit configuration."@en</span> .
+
+<span class="comment"># ── Single ECMORun spans both epochs ──</span>
+<span class="eco">:ECMORun_POX01</span>  <span class="prop">rdf:type</span>  <span class="eco">ecmo-co:ECMORun</span> ;
+    <span class="prop">ecmo-co:startedAt</span>              <span class="lit">"2026-05-08T12:00:00Z"^^xsd:dateTime</span> ;
+    <span class="prop">ecmo-co:hadConfigurationEpoch</span>  <span class="eco">:Config_POX01_Epoch1</span> ,
+                               <span class="eco">:Config_POX01_Epoch2</span> ;
+    <span class="prop">bfo:0000057</span>  <span class="eco">:Patient_POX01</span> , <span class="eco">:Circuit_POX01</span> .
+</pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="section-label mb-2">SPARQL Competency Queries</div>
+
+          <p class="small text-muted mb-2"><strong>Q1 — Oxygenators per configuration epoch of a run</strong></p>
+          <pre class="sparql"><span class="cmt"># Namespace declarations omitted.</span>
+<span class="kw">SELECT</span> <span class="var">?epoch</span> <span class="var">?start</span> (<span class="kw">COUNT</span>(<span class="kw">DISTINCT</span> <span class="var">?oxy</span>) <span class="kw">AS</span> <span class="var">?oxygenators</span>)
+<span class="kw">WHERE</span> {
+  <span class="var">?run</span>    <span class="uri">ecmo-co:hadConfigurationEpoch</span>  <span class="var">?epoch</span> .
+  <span class="var">?epoch</span>  <span class="uri">ecmo-co:startedAt</span>  <span class="var">?start</span> ;
+          <span class="uri">ecmo-co:isAbout</span>    <span class="var">?oxy</span> .
+  <span class="var">?oxy</span>    <span class="uri">rdf:type</span>  <span class="uri">ecmo-co:Oxygenator</span> .
+}
+<span class="kw">GROUP BY</span> <span class="var">?epoch</span> <span class="var">?start</span>
+<span class="kw">ORDER BY</span> <span class="var">?start</span></pre>
+          <div class="query-result">?epoch               | ?start                 | ?oxygenators
+---------------------|------------------------|-------------
+:Config_POX01_Epoch1 | "2026-05-08T12:00:00Z" | 1
+:Config_POX01_Epoch2 | "2026-05-11T09:15:00Z" | 2</div>
+
+          <p class="small text-muted mt-3 mb-2"><strong>Q2 — Retrieve the circuit connections asserted by a configuration epoch</strong></p>
+          <pre class="sparql"><span class="cmt"># Namespace declarations omitted.</span>
+<span class="kw">SELECT</span> <span class="var">?cfg</span> <span class="var">?conn</span> <span class="var">?upstream</span> <span class="var">?downstream</span>
+<span class="kw">WHERE</span> {
+  <span class="var">?cfg</span>   <span class="uri">ecmo-co:assertsConnection</span>  <span class="var">?conn</span> .
+  <span class="var">?conn</span>  <span class="uri">ecmo-co:hasUpstreamPort</span>    <span class="var">?upstream</span> ;
+         <span class="uri">ecmo-co:hasDownstreamPort</span>  <span class="var">?downstream</span> .
+}
+<span class="kw">ORDER BY</span> <span class="var">?conn</span></pre>
+          <div class="query-result">?cfg                 | ?conn         | ?upstream             | ?downstream
+---------------------|---------------|-----------------------|---------------------
+:Config_POX01_Epoch2 | :CC_OxyA_to_Y | :Port_OxyA_out        | :Port_PostOxy_Y_in_A
+:Config_POX01_Epoch2 | :CC_OxyB_to_Y | :Port_OxyB_out        | :Port_PostOxy_Y_in_B
+:Config_POX01_Epoch2 | :CC_Y_to_OxyA | :Port_PostPump_Y_outA | :Port_OxyA_in
+:Config_POX01_Epoch2 | :CC_Y_to_OxyB | :Port_PostPump_Y_outB | :Port_OxyB_in</div>
+          <p class="small text-muted mt-2 mb-0">All four connections of the parallel section are asserted by the Epoch 2 configuration: the split at the post-pump Y-piece and the recombination at the post-oxygenator Y-piece.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav footer -->
+  <div class="d-flex justify-content-between mt-2">
+    <a href="va-central.html" class="btn btn-outline-secondary btn-sm">← Prev: V-A Central</a>
+    <a href="index.html" class="btn btn-outline-secondary btn-sm">All Examples</a>
+  </div>
+
+  <div data-ecmoco-disclaimer class="small text-muted border-top pt-3 mt-4">
+    Research prototype; not clinical guidance. The scenario on this page is synthetic: an invented case, not derived from any patient record. The RDF block is an excerpt of the scenario file; each query result shown is what the query returns over that scenario plus the ECMO-CO v0.1 ontology. Not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+
+</div>
+
+<footer class="small text-muted text-center py-3"><span>ECMO-CO project, Stony Brook University</span> · <span>Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

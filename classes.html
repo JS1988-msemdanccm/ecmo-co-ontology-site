@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECMO-CO — Class &amp; Property Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8F9FA; }
+    .ecmoco-banner { background: #FFF8E1; color: #5D4037; font-size: 0.8rem; text-align: center; padding: 0.35rem 1rem; border-bottom: 1px solid #FFE082; }
+    .ecmoco-disclaimer { font-size: 0.8rem; }
+    .topbar { background: #0D1B2A; color: #E3F2FD; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .topbar a { color: #90CAF9; text-decoration: none; font-size: 0.85rem; }
+    .topbar a:hover { text-decoration: underline; }
+    .topbar .title { font-weight: 700; font-size: 0.95rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9E9E9E; }
+    code { background: #F3F4F6; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; color: #1565C0; }
+    table { background: #fff; }
+    th { font-size: 0.8rem; }
+    td { font-size: 0.86rem; vertical-align: top; }
+    .bfo-branch td { background: #ECEFF1; font-weight: 700; color: #37474F; font-size: 0.8rem; letter-spacing: 0.03em; }
+    .bfo-id { font-family: monospace; font-size: 0.78rem; color: #607D8B; }
+    .badge-ready { background: #E8F5E9; color: #2E7D32; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-pending { background: #FFF8E1; color: #F57F17; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-fma { background: #ECEFF1; color: #546E7A; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-proposed { background: #ECEFF1; color: #78909C; font-size: 0.72em; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .proposed-block { background: #FAFAFA; border: 1px dashed #B0BEC5; border-radius: 8px; }
+    .proposed-block, .proposed-block td, .proposed-block th { color: #90A4AE; }
+    .proposed-block td { font-style: italic; }
+    footer { background: #263238; color: #B0BEC5; }
+    footer a { color: #90CAF9; }
+  </style>
+</head>
+<body>
+
+<div data-ecmoco-banner class="ecmoco-banner">Research demonstrator (pilot) · Website v1 · ECMO-CO v0.1</div>
+
+<div class="topbar">
+  <a href="index.html">← ECMO-CO Home</a>
+  <span class="title">Class &amp; Property Reference</span>
+  <span style="color:#546E7A; font-size:0.8rem">Phase 1 v0.1 · BFO 2020</span>
+</div>
+
+<div class="container my-4">
+
+  <div class="section-label mb-1">About this reference</div>
+  <p class="text-muted mb-2" style="font-size:0.92rem; max-width:60rem">
+    ECMO-CO is a <strong>realist, top-down</strong> domain ontology: every class sits under a class of
+    <strong>Basic Formal Ontology (BFO) 2020</strong>. FMA is a SKOS annotation mapping, not an import.
+    Physical <em>kind</em> is modelled separately from the <em>role/function</em> a thing bears. Placement follows
+    these BFO rules, and where ECMO-CO is stricter than BFO the tables mark the rule as ECMO-CO policy:
+  </p>
+  <ul class="text-muted small mb-2" style="max-width:60rem">
+    <li><strong>BFO:</strong> a relational quality depends on two or more bearers at once, none a spatial region and no two sharing a part (BFO 2.0 Reference [057-001], [131-004]).</li>
+    <li><strong>BFO 2020:</strong> a quality or a realizable entity (role, disposition, function) inheres in an independent continuant that is not a spatial region (BFO 2020 <em>inheres in</em>, 051-BFO; <em>realizable entity</em>, 058-BFO). The BFO 2020 OWL file sets no material-bearer requirement for a quality or a role, and its role examples include the role of a boundary (058-BFO, 061-BFO).</li>
+    <li><strong>BFO 2.0 Reference, stricter for roles:</strong> every realizable entity, a role included, specifically depends on some material entity ([063-002]), and that material entity is then a bearer of it ([051-002], [053-004]).</li>
+    <li><strong>BFO:</strong> a function is a disposition, and a disposition's bearer is a material entity (BFO 2.0 Reference [062-002], [064-001]).</li>
+    <li><strong>ECMO-CO policy, narrower than BFO because it names the bearer classes:</strong> drainage and return roles, like drainage and return functions, are borne only by material cannula parts (<code>LumenConduit</code> or <code>CannulaTip</code>), never by a Site; circuit blood pressure is borne by the blood, never by a Site; the two contact interfaces take material bearers.</li>
+  </ul>
+  <p class="text-muted mb-2" style="font-size:0.92rem; max-width:60rem">The tables below give the Phase 1 TBox in full.</p>
+  <p class="text-muted small mb-3" style="max-width:60rem">
+    <strong>Scope:</strong> v0.1 <strong>defines 36 classes across the two ontology files</strong> (31 <span class="badge-ready">ready</span> + 5
+    <span class="badge-pending">pending</span>), 10 object properties, 2 datatype properties, and three mode
+    classifier individuals, checked by a four-layer test pipeline (OWL parse → OWL-RL closure → SHACL → SPARQL competency queries). <code>curationStatus</code>
+    on each row marks whether a class is finalized (<span class="badge-ready">ready</span>) or
+    <strong>defined in v0.1 but not yet finalized</strong> (<span class="badge-pending">pending</span>) — a
+    curation-review state, distinct from the Phase 2 <em>roadmap</em> layers
+    (<a href="#phase2">SOSA, PROV-O, QUDT, IAO</a>), which are proposed and shown dampened at the bottom.
+  </p>
+  <p class="text-muted small mb-4" style="max-width:60rem">
+    <strong>Instantiation.</strong> Of the 5 pending, <code>CircuitConnection</code> and
+    <code>ConfigurationMode</code> are <strong>used in the Phase 1 scenarios</strong> (<code>ConfigurationMode</code>
+    through its three mode individuals). The other 3
+    (<code>RecordedConnection</code>, <code>FenestrationRim</code>, <code>PatientCircuitAssembly</code>) are
+    <strong>forward-declared Phase 2 stubs</strong> — declared in the ontology but not instantiated in any scenario file.
+  </p>
+
+  <!-- ============ CLASSES ============ -->
+  <div class="section-label mb-2">1 · Classes — BFO 2020 placement</div>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered table-sm align-middle shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th style="width:22%">ECMO-CO class</th>
+          <th style="width:26%">BFO 2020 parent</th>
+          <th>Note / mapping</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bfo-branch"><td colspan="3">Occurrent — Process <span class="bfo-id">BFO:0000015</span></td></tr>
+        <tr><td><code>ECMORun</code></td><td>Process <span class="bfo-id">BFO:0000015</span></td><td>The support episode delivered to one patient between cannulation and decannulation; its configuration epochs are records linked to it by <code>hadConfigurationEpoch</code>.</td></tr>
+        <tr><td><code>BloodFlowProcess</code></td><td>Process <span class="bfo-id">BFO:0000015</span></td><td>The flow of blood through the circuit during a run.</td></tr>
+
+        <tr class="bfo-branch"><td colspan="3">Continuant — Material entity (Object aggregate / Object / Fiat object part)</td></tr>
+        <tr><td><code>ECMOCircuit</code>, <code>CircuitSegment</code></td><td>Object aggregate <span class="bfo-id">BFO:0000027</span></td><td>Aggregates of individually separable circuit components.</td></tr>
+        <tr><td><code>PatientCircuitAssembly</code> <span class="badge-pending">pending</span></td><td>Object aggregate <span class="bfo-id">BFO:0000027</span></td><td>The patient-plus-circuit whole during support.</td></tr>
+        <tr><td><code>CircuitComponent</code> — <code>Cannula</code>, <code>BloodPump</code>, <code>Oxygenator</code>, <code>Port</code>, <code>CircuitTubing</code></td><td>Object <span class="bfo-id">BFO:0000030</span></td><td>Discrete material devices (<code>CircuitComponent</code> is the parent; the five are its subclasses).</td></tr>
+        <tr><td><code>LumenConduit</code>, <code>CannulaTip</code>, <code>FenestrationRim</code> <span class="badge-pending">pending</span></td><td>Fiat object part <span class="bfo-id">BFO:0000024</span></td><td>Material fiat parts of a cannula (<code>FenestrationRim</code>: of a lumen conduit), demarcated by fiat rather than physical boundaries; as material entities they <strong>can</strong> bear functions and roles. (<code>FenestrationRim</code> is pending; <code>LumenConduit</code>/<code>CannulaTip</code> ready.)</td></tr>
+        <tr><td><code>Patient</code></td><td>Material entity <span class="bfo-id">BFO:0000040</span></td><td>The supported human being.</td></tr>
+        <tr><td><code>PortionOfCircuitBlood</code> <span class="badge-fma">SKOS→FMA</span></td><td>Material entity <span class="bfo-id">BFO:0000040</span></td><td>A material entity that is the portion of blood occupying the extracorporeal circuit, or a named segment of it, at a given time, and that is the bearer of the fluid qualities — pressure, temperature, oxygen saturation, haemoglobin concentration — that extracorporeal measurements report. Carries a <code>skos:closeMatch</code> to an FMA class.</td></tr>
+        <tr><td><code>AnatomicalStructure</code> — <code>AccessVessel</code>, <code>AccessArtery</code>, <code>CentralCardiacStructure</code> <span class="badge-fma">SKOS→FMA</span></td><td>Material entity <span class="bfo-id">BFO:0000040</span></td><td>ECMO-CO classes under BFO material entity: cannulation sites and tip positions; the three are subclasses of <code>AnatomicalStructure</code>. FMA is a SKOS annotation mapping, not an import: <code>AnatomicalStructure</code> carries a <code>skos:broadMatch</code> and <code>AccessVessel</code> and <code>AccessArtery</code> a <code>skos:closeMatch</code> to FMA classes; <code>CentralCardiacStructure</code> has no FMA mapping.</td></tr>
+
+        <tr class="bfo-branch"><td colspan="3">Continuant — Immaterial entity (Site) <span class="bfo-id">BFO:0000029</span></td></tr>
+        <tr><td><code>CannulaLumen</code>, <code>CannulaFenestration</code></td><td>Site <span class="bfo-id">BFO:0000029</span></td><td>Immaterial entities — three-dimensional, bounded by material (BFO site; BFO 2.0 Reference <code>[034-002]</code>). <strong>Not</strong> spatial regions: BFO 2020 declares site and spatial region disjoint subclasses of immaterial entity, so a Site is an independent continuant that is not a spatial region, and the BFO 2020 OWL file would let it bear a quality or a role. <strong>ECMO-CO policy</strong> does not let a Site bear a role or a function. For a function this is also a BFO requirement (a function is a disposition, whose bearer is material — BFO 2.0 Reference [062-002], [064-001]). For a role it is ECMO-CO policy relative to the BFO 2020 OWL file; the BFO 2.0 Reference would itself require a material bearer ([063-002]). The SHACL role-bearer shape enforces this and the negative fixture tests it. For qualities, see the interface rows below: ECMO-CO declines a Site as bearer of the contact interfaces and of circuit blood pressure, but <em>requires</em> Site bearers for <code>SpatialContinuityInterface</code>.</td></tr>
+        <tr><td><code>AnatomicalSpace</code> <span class="badge-fma">SKOS→FMA</span></td><td>Site <span class="bfo-id">BFO:0000029</span></td><td>An immaterial anatomical entity of the patient's body (e.g. a vessel lumen) that may serve as the venue for cannula tip positioning or blood flow. Carries a <code>skos:broadMatch</code> to an FMA class.</td></tr>
+
+        <tr class="bfo-branch"><td colspan="3">Continuant — Generically dependent continuant (information) <span class="bfo-id">BFO:0000031</span></td></tr>
+        <tr><td><code>CannulationConfiguration</code></td><td>Generically dependent continuant <span class="bfo-id">BFO:0000031</span></td><td>The time-bounded configuration record (epoch).</td></tr>
+        <tr><td><code>ConfigurationMode</code> <span class="badge-pending">pending</span></td><td>Generically dependent continuant <span class="bfo-id">BFO:0000031</span></td><td>Mode classifier (information artefact). Named individuals: V-V, V-A, V-AV (see §4).</td></tr>
+        <tr><td><code>CircuitConnection</code> — <code>RecordedConnection</code> <span class="badge-pending">pending</span></td><td>Generically dependent continuant <span class="bfo-id">BFO:0000031</span></td><td>Reified directed edge: a record naming its upstream and downstream port (<code>hasUpstreamPort</code>, <code>hasDownstreamPort</code>). <code>RecordedConnection</code> is a subclass. Both have <code>curationStatus pending</code>.</td></tr>
+
+        <tr class="bfo-branch"><td colspan="3">Continuant — Specifically dependent continuant (quality / realizable)</td></tr>
+        <tr><td><code>CircuitBloodPressure</code></td><td>Quality <span class="bfo-id">BFO:0000019</span></td><td>A quality that inheres in a portion of circuit blood and that is the pressure that portion of blood exerts at the place in the extracorporeal circuit it occupies at a given time. Its bearer is a <code>PortionOfCircuitBlood</code>, never a Site — <strong>ECMO-CO policy</strong> (BFO would permit a Site bearer), enforced by a SHACL shape. It carries no measured value; observations are Phase 2.</td></tr>
+        <tr><td><code>PhysicalInterface</code> — <code>CircuitInterface</code>, <code>DeviceTissueInterface</code>, <code>SpatialContinuityInterface</code></td><td>Relational quality <span class="bfo-id">BFO:0000145</span></td><td>The <strong>genus</strong> of blood-relevant physical interfaces. Depends on ≥2 bearers; per BFO a bearer may be <strong>any independent continuant that is not a spatial region</strong>, no two sharing common parts (BFO 2.0 Reference [057-001], [056-002], [131-004]) — <strong>not</strong> required to be <code>Port</code>s or even material. Ceases when the interfacing relationship ends. All four ready; the three subclasses are <strong>pairwise disjoint</strong>, and bearer materiality is set <em>per subclass</em>: <br>• <code>CircuitInterface</code> — Port↔Port mating (the <em>only</em> class carrying the two-Port rule); <br>• <code>DeviceTissueInterface</code> — cannula↔tissue apposition (material bearers, no Ports); <br>• <code>SpatialContinuityInterface</code> — <strong>Site↔Site</strong> open blood-conducting continuity (two <em>immaterial</em> Site bearers, e.g. a fenestration and the atrial cavity — no Ports, no material). Material bearers on the two contact subclasses are ECMO-CO policy (physical contact requires surfaces), not a BFO requirement; the Site-bearer requirement on the continuity subclass <em>is</em> machine-enforced.</td></tr>
+        <tr><td><code>DrainageRole</code>, <code>ReturnRole</code></td><td>Role <span class="bfo-id">BFO:0000023</span></td><td>Realizable; the <em>configured</em> use of a bearer in an epoch.</td></tr>
+        <tr><td><code>DrainageFunction</code>, <code>ReturnFunction</code></td><td>Function <span class="bfo-id">BFO:0000034</span></td><td>Realizable; the <em>design intent</em> of a lumen conduit (distinct from its current role).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ OBJECT PROPERTIES ============ -->
+  <div class="section-label mb-2">2 · Object properties</div>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered table-sm align-middle shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th style="width:16%">Property</th>
+          <th style="width:18%">Domain → Range</th>
+          <th>Definition</th>
+          <th style="width:90px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>isAbout</code></td><td><code>CannulationConfiguration</code> → <span class="bfo-id">(range not declared)</span></td><td>Relates an information-content GDC to the persistent entity it describes. Phase 1 placeholder for <code>iao:is_about</code> (IAO:0000136).</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>hasModeAssertion</code></td><td><code>CannulationConfiguration</code> → <code>ConfigurationMode</code></td><td>Records the cannulation mode (V-V, V-A, V-AV) in force for the configuration epoch.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>hadConfigurationEpoch</code></td><td><code>ECMORun</code> → <code>CannulationConfiguration</code></td><td>Relates a run to one of its stable configuration epochs. A run with no reconfiguration has exactly one epoch.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>assertsConnection</code></td><td><code>CannulationConfiguration</code> → <code>CircuitConnection</code></td><td>Relates an epoch to a reified circuit-connection individual active during it.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>assertsRoleOn</code></td><td><code>CannulationConfiguration</code> → <span class="bfo-id">(range not declared; left open in Phase 1)</span></td><td>Records that a role instance (DrainageRole / ReturnRole) was borne by a specific LumenConduit or CannulaTip during this epoch. Range intentionally open in Phase 1; expected to become a reified role-assignment node.</td><td><span class="badge-pending">pending</span></td></tr>
+        <tr><td><code>opensInto</code></td><td><span class="bfo-id">(domain and range not declared)</span></td><td>Topological relation from a fenestration (Site) to the lumen (Site) it communicates with; supports lumen-connection SPARQL queries.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>hasUpstreamPort</code></td><td><code>CircuitConnection</code> → <code>Port</code></td><td>The port from which flow exits to enter this connection. Encodes flow directionality.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>hasDownstreamPort</code></td><td><code>CircuitConnection</code> → <code>Port</code></td><td>The port into which flow enters from this connection. Encodes flow directionality.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>connectionInterface</code></td><td><code>CircuitConnection</code> → <code>PhysicalInterface</code></td><td>Links the reified connection (GDC record) to the PhysicalInterface (relational quality) holding while the two ports remain mated.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>bears</code></td><td><span class="bfo-id">(domain and range not declared)</span></td><td>Phase 1 convenience inverse of <code>bfo:0000197</code> (inheres in): bearer → the realizable or quality it bears. BFO 2020 constrains the <em>bearer</em> — the subject of <code>bears</code> — to an <em>independent continuant that is not a spatial region</em> (BFO 2020 <em>bearer of</em>, 053-BFO; BFO 2.0 Reference <code>[053-004]</code>). For a quality that bearer need not be material. For a function it must be (BFO 2.0 Reference <code>[062-002]</code>, <code>[064-001]</code>). For a role the BFO 2.0 Reference also requires a material entity (<code>[063-002]</code>); the BFO 2020 OWL file does not. Narrower limits are per-class ECMO-CO policy, not properties of <code>bears</code>. Phase 2: remove and use <code>bfo:0000196</code> (bearer of) directly.</td><td><span class="badge-ready">ready</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ DATATYPE PROPERTIES ============ -->
+  <div class="section-label mb-2">3 · Datatype properties</div>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered table-sm align-middle shadow-sm">
+      <thead class="table-dark">
+        <tr><th style="width:16%">Property</th><th style="width:18%">Range</th><th>Definition</th><th style="width:90px">Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>startedAt</code></td><td><code>xsd:dateTime</code></td><td>Wall-clock instant an episode or configuration epoch began. Phase 1 placeholder for <code>prov:startedAtTime</code>.</td><td><span class="badge-ready">ready</span></td></tr>
+        <tr><td><code>endedAt</code></td><td><code>xsd:dateTime</code></td><td>Wall-clock instant an episode or configuration epoch ended. Phase 1 placeholder for <code>prov:endedAtTime</code>.</td><td><span class="badge-ready">ready</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ MODE CLASSIFIERS ============ -->
+  <div class="section-label mb-2">4 · Mode classifier individuals</div>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered table-sm align-middle shadow-sm">
+      <thead class="table-dark">
+        <tr><th style="width:16%">Individual</th><th style="width:18%">Type</th><th>Definition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>VV-mode</code></td><td><code>ConfigurationMode</code></td><td>Veno-venous configuration: drainage from a systemic vein, return to a systemic vein. Used for isolated respiratory failure.</td></tr>
+        <tr><td><code>VA-mode</code></td><td><code>ConfigurationMode</code></td><td>Veno-arterial configuration: drainage from a systemic vein, return to a systemic artery. Used for cardiac or combined cardiorespiratory failure.</td></tr>
+        <tr><td><code>VAV-mode</code></td><td><code>ConfigurationMode</code></td><td>Hybrid configuration: drainage from a systemic vein, return split between an artery and a vein (Y-circuit). Used to address differential hypoxia (Harlequin syndrome) during V-A support.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ PHASE 2 PROPOSED ============ -->
+  <div id="phase2" class="section-label mb-2">5 · Phase 2 — proposed layers <span class="badge-proposed">not finalized</span></div>
+  <div class="proposed-block p-3 p-md-4 mb-5">
+    <p class="small mb-3" style="font-style:normal; color:#607D8B"><strong>Proposed direction, not yet implemented.</strong> These layers extend the same realist pattern from static topology to instrumented monitoring. Class lists are deliberately not enumerated here because the Phase 2 TBox is not yet authored — only the candidate standards and their intended role are settled.</p>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle mb-0">
+        <thead><tr><th style="width:22%">Candidate standard</th><th>Intended role</th><th style="width:110px">Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SOSA / SSN</strong> (W3C)</td><td>Sensor / observation layer — circuit measurements (pressure, flow, gas exchange) about a <code>CircuitSegment</code>, observing qualities such as <code>CircuitBloodPressure</code> that inhere in the <code>PortionOfCircuitBlood</code>.</td><td><span class="badge-proposed">Proposed</span></td></tr>
+          <tr><td><strong>PROV-O</strong> (W3C)</td><td>Provenance — dataset lineage and registry data provenance; migration target for <code>startedAt</code>/<code>endedAt</code>.</td><td><span class="badge-proposed">Proposed</span></td></tr>
+          <tr><td><strong>QUDT</strong></td><td>Measurement units — flow rates (L/min), pressures (mmHg), FiO₂.</td><td><span class="badge-proposed">Proposed</span></td></tr>
+          <tr><td><strong>IAO / OBI</strong></td><td>Information artifact — replace the Phase 1 <code>curationStatus</code> placeholder; formalize data items and the mode classifier.</td><td><span class="badge-proposed">Proposed</span></td></tr>
+          <tr><td><strong>SKOS → <code>oboInOwl:hasDbXref</code></strong></td><td>External terminology binding (SNOMED, LOINC, OMOP/ELSO) — currently latent; proposed for Phase 2 interoperability.</td><td><span class="badge-proposed">Proposed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center py-3 border-top mt-2">
+    <a href="index.html" class="btn btn-outline-secondary btn-sm">← ECMO-CO Home</a>
+    <span class="text-muted small">ECMO-CO Phase 1 · v0.1 · 36 classes across the two ontology files · 10 object + 2 datatype properties · BFO 2020 · 2026</span>
+    <a href="graph/index.html" class="btn btn-outline-primary btn-sm">Ontology Graph →</a>
+  </div>
+
+  <div data-ecmoco-disclaimer class="ecmoco-disclaimer alert alert-warning mb-0">
+    <strong>Research prototype, not clinical guidance.</strong> All scenarios and patients in the worked examples are synthetic test instances; none is derived from real patient data. This is not an official Stony Brook University website. All rights reserved pending institutional licensing.
+  </div>
+
+</div>
+
+<footer class="py-4 mt-4">
+  <div class="container d-flex justify-content-between flex-wrap gap-2 align-items-center">
+    <span>ECMO-CO project, Stony Brook University · Website v1 (pilot) · ECMO-CO v0.1 · built from 5de6c33 on 2026-09-28</span>
+    <div class="d-flex gap-3">
+      <a href="index.html">Home</a>
+      <a href="graph/index.html">Graph</a>
+      <a href="example/index.html">Examples</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
